@@ -35,7 +35,7 @@ Phases 1-3 complete. All 37 requirements implemented.
 - NOTIFY-01/02: Progress notifications
 - OUT-07: Configurable output directory
 
-**Plans:** 4 plans in 2 waves (3 implementation + 1 gap closure)
+**Plans:** 5 plans in 2 waves (3 implementation + 1 gap closure + 1 upgrade)
 
 **Plan 01:** Task Scheduler & Job Queue
 - Implements task_id generation (UUID)
@@ -59,6 +59,13 @@ Phases 1-3 complete. All 37 requirements implemented.
 - Document notebooklm-py SDK v0.1.1 limitations
 - Diagnose media generation rate_limiter issue
 - Update UAT with final gap status
+- Wave: 1
+
+**Plan 05:** SDK Upgrade & Report-Based Articles
+- Upgrade Python to 3.10+ (enables notebooklm-py 0.2.0+)
+- Upgrade notebooklm-py to 0.3.2
+- Replace chat.ask() with generate_report() for articles
+- Add --format synthesis|report CLI option
 - Wave: 1
 
 **Success Criteria:**
@@ -92,7 +99,7 @@ Phases 1-3 complete. All 37 requirements implemented.
 | 1 | v1.0 | Complete | 2/2 |
 | 2 | v1.0 | Complete | 2/2 |
 | 3 | v1.0 | Complete | 3/3 |
-| 4 | v1.1 | Gap Closure | 4/4 |
+| 4 | v1.1 | Gap Closure + Upgrade | 4/5 |
 
 ---
 
