@@ -22,6 +22,21 @@ class TopicStatus(str, Enum):
     FAILED = "FAILED"
 
 
+class TaskStatus(str, Enum):
+    """Task pipeline status state machine."""
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    NOTEBOOK_CREATED = "NOTEBOOK_CREATED"
+    RESEARCH_TRIGGERED = "RESEARCH_TRIGGERED"
+    RESEARCH_COMPLETED = "RESEARCH_COMPLETED"
+    SYNTHESIS_DONE = "SYNTHESIS_DONE"
+    ARTICLE_DONE = "ARTICLE_DONE"
+    MEDIA_DONE = "MEDIA_DONE"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
 class Topic(Base):
     """Topic entity for managing article writing tasks."""
     
@@ -149,6 +164,52 @@ class Topic(Base):
             "article_generated": bool(self.article_generated),
             "infographic_generated": bool(self.infographic_generated),
             "audio_generated": bool(self.audio_generated),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class Task(Base):
+    """Task entity for async pipeline execution tracking."""
+    
+    __tablename__ = "tasks"
+    
+    id = Column(String(36), primary_key=True)  # UUID
+    topic_id = Column(Integer, nullable=False)
+    status = Column(
+        SQLEnum(TaskStatus, name="task_status", create_constraint=False),
+        default=TaskStatus.PENDING,
+        nullable=False
+    )
+    current_stage = Column(String, nullable=True)
+    progress_percent = Column(Integer, default=0)
+    error_message = Column(String, nullable=True)
+    output_dir = Column(String, nullable=True)
+    prompt = Column(String, nullable=True)
+    prompt_file = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+    
+    def __repr__(self):
+        return f"<Task(id={self.id}, topic_id={self.topic_id}, status={self.status})>"
+    
+    def to_dict(self) -> dict:
+        """Convert task to dictionary for serialization."""
+        return {
+            "id": self.id,
+            "topic_id": self.topic_id,
+            "status": self.status.value if self.status else None,
+            "current_stage": self.current_stage,
+            "progress_percent": self.progress_percent,
+            "error_message": self.error_message,
+            "output_dir": self.output_dir,
+            "prompt": self.prompt,
+            "prompt_file": self.prompt_file,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

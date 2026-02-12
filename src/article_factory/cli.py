@@ -72,60 +72,83 @@ def create_topic(
 
 @app.command("status")
 def show_status(
+    task_id: str = typer.Argument(None, help="Task ID to check (leave empty for topic status)"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
-    """Show status of all topics."""
-    topics = database.get_all_topics()
-
-    if not topics:
+    """Show task status. If no task_id, shows all topics."""
+    from article_factory.scheduler import get_task, get_all_tasks
+    
+    if task_id:
+        task = get_task(task_id)
+        if not task:
+            typer.echo(f"Task {task_id} not found")
+            raise typer.Exit(code=1)
+        
         if json_output:
-            typer.echo("[]")
+            typer.echo(json.dumps(task.to_dict(), indent=2, default=str))
         else:
-            typer.echo("No topics found.")
-        return
+            typer.echo(f"Task: {task.id}")
+            typer.echo(f"  Topic: {task.topic_id}")
+            typer.echo(f"  Status: {task.status.value if task.status else 'UNKNOWN'}")
+            typer.echo(f"  Stage: {task.current_stage or 'N/A'}")
+            typer.echo(f"  Progress: {task.progress_percent}%")
+            if task.error_message:
+                typer.echo(f"  Error: {task.error_message}")
+            if task.output_dir:
+                typer.echo(f"  Output: {task.output_dir}")
+    else:
+        # Show all topics (original behavior)
+        topics = database.get_all_topics()
 
-    if json_output:
-        topics_output = []
+        if not topics:
+            if json_output:
+                typer.echo("[]")
+            else:
+                typer.echo("No topics found.")
+            return
+
+        if json_output:
+            topics_output = []
+            for t in topics:
+                topic_dict = {
+                    "id": t["id"],
+                    "topic": t["topic"],
+                    "status": t["status"],
+                    "notebook_id": t.get("notebook_id"),
+                    "retry_count": t["retry_count"],
+                    "created_at": t["created_at"],
+                }
+                topics_output.append(topic_dict)
+            typer.echo(json.dumps(topics_output, indent=2))
+            return
+
+        # Table header
+        header = f"{'ID':<6} {'Topic':<30} {'Status':<12} {'Retries':<9} {'Created':<20}"
+        typer.echo(header)
+        typer.echo("-" * len(header))
+
+        # Table rows
         for t in topics:
-            topic_dict = {
-                "id": t["id"],
-                "topic": t["topic"],
-                "status": t["status"],
-                "notebook_id": t.get("notebook_id"),
-                "retry_count": t["retry_count"],
-                "created_at": t["created_at"],
-            }
-            topics_output.append(topic_dict)
-        typer.echo(json.dumps(topics_output, indent=2))
-        return
+            created = t["created_at"][:19] if t["created_at"] else "N/A"
+            topic_display = t["topic"][:28] + ".." if len(t["topic"]) > 30 else t["topic"]
+            typer.echo(
+                f"{t['id']:<6} {topic_display:<30} {t['status']:<12} {t['retry_count']:<9} {created:<20}"
+            )
 
-    # Table header
-    header = f"{'ID':<6} {'Topic':<30} {'Status':<12} {'Retries':<9} {'Created':<20}"
-    typer.echo(header)
-    typer.echo("-" * len(header))
+        # Summary counts
+        typer.echo("")
+        total = len(topics)
+        by_status = {}
+        for t in topics:
+            by_status[t["status"]] = by_status.get(t["status"], 0) + 1
 
-    # Table rows
-    for t in topics:
-        created = t["created_at"][:19] if t["created_at"] else "N/A"
-        topic_display = t["topic"][:28] + ".." if len(t["topic"]) > 30 else t["topic"]
-        typer.echo(
-            f"{t['id']:<6} {topic_display:<30} {t['status']:<12} {t['retry_count']:<9} {created:<20}"
-        )
+        parts = [f"{total} total"]
+        for status_name in ["NEW", "PENDING", "PROCESSING", "COMPLETED", "FAILED"]:
+            count = by_status.get(status_name, 0)
+            if count > 0:
+                parts.append(f"{count} {status_name.lower()}")
 
-    # Summary counts
-    typer.echo("")
-    total = len(topics)
-    by_status = {}
-    for t in topics:
-        by_status[t["status"]] = by_status.get(t["status"], 0) + 1
-
-    parts = [f"{total} total"]
-    for status_name in ["NEW", "PENDING", "PROCESSING", "COMPLETED", "FAILED"]:
-        count = by_status.get(status_name, 0)
-        if count > 0:
-            parts.append(f"{count} {status_name.lower()}")
-
-    typer.echo(f"Summary: {', '.join(parts)}")
+        typer.echo(f"Summary: {', '.join(parts)}")
 
 
 @app.command("retry")
@@ -213,6 +236,102 @@ def version() -> None:
     from article_factory import __version__
 
     typer.echo(f"Article Factory v{__version__}")
+
+
+@app.command("run")
+def run_topic(
+    topic_id: int = typer.Argument(..., help="Topic ID to run"),
+    prompt: str = typer.Option(None, "--prompt", "-p", help="Article generation prompt"),
+    prompt_file: str = typer.Option(None, "--prompt-file", "-f", help="Path to prompt file"),
+    output_dir: str = typer.Option(None, "--output-dir", "-o", help="Custom output directory"),
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """Start async pipeline for topic, return task_id immediately."""
+    from article_factory.scheduler import run_pipeline_async
+    
+    # Validate topic exists
+    topic = database.get_topic(topic_id)
+    if topic is None:
+        typer.echo(f"Error: Topic {topic_id} not found", err=True)
+        raise typer.Exit(code=1)
+    
+    task_id = run_pipeline_async(topic_id, prompt, prompt_file, output_dir)
+    
+    if json_output:
+        typer.echo(json.dumps({
+            "task_id": task_id,
+            "topic_id": topic_id,
+            "status": "started"
+        }))
+    else:
+        typer.echo(f"Task started!")
+        typer.echo(f"  Task ID: {task_id}")
+        typer.echo(f"  Check status: article-factory status {task_id}")
+
+
+@app.command("status")
+def show_status(
+    task_id: str = typer.Argument(None, help="Task ID to check"),
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """Show task status. If no task_id, shows all tasks."""
+    from article_factory.scheduler import get_task, get_all_tasks
+    
+    if task_id:
+        task = get_task(task_id)
+        if not task:
+            typer.echo(f"Task {task_id} not found")
+            raise typer.Exit(code=1)
+        
+        if json_output:
+            typer.echo(json.dumps(task.to_dict(), indent=2, default=str))
+        else:
+            typer.echo(f"Task: {task.id}")
+            typer.echo(f"  Topic: {task.topic_id}")
+            typer.echo(f"  Status: {task.status.value if task.status else 'UNKNOWN'}")
+            typer.echo(f"  Stage: {task.current_stage or 'N/A'}")
+            typer.echo(f"  Progress: {task.progress_percent}%")
+            if task.error_message:
+                typer.echo(f"  Error: {task.error_message}")
+            if task.output_dir:
+                typer.echo(f"  Output: {task.output_dir}")
+    else:
+        # Show all tasks
+        tasks = get_all_tasks()
+        if not tasks:
+            typer.echo("No tasks found.")
+            return
+        
+        header = f"{'Task ID':<38} {'Status':<12} {'Stage':<22} {'Progress':<10}"
+        typer.echo(header)
+        typer.echo("-" * len(header))
+        
+        for task in tasks:
+            status = task.status.value if task.status else "UNKNOWN"
+            stage = (task.current_stage or "N/A")[:20]
+            typer.echo(f"{task.id:<38} {status:<12} {stage:<22} {task.progress_percent}%")
+
+
+@app.command("cancel")
+def cancel_task_cmd(
+    task_id: str = typer.Argument(..., help="Task ID to cancel"),
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """Cancel a pending or running task."""
+    from article_factory.scheduler import cancel_task
+    
+    success = cancel_task(task_id)
+    
+    if success:
+        if json_output:
+            typer.echo(json.dumps({"task_id": task_id, "status": "cancelled"}))
+        else:
+            typer.echo(f"Task {task_id} cancelled")
+    else:
+        if json_output:
+            typer.echo(json.dumps({"task_id": task_id, "status": "error", "message": "Cannot cancel - may already be completed or cancelled"}))
+        else:
+            typer.echo(f"Cannot cancel task {task_id} - may already be completed or cancelled")
 
 
 @app.command("batch")
