@@ -96,8 +96,8 @@ No dependencies      Requires Phase 1
 **Phase 4 completion:**
 - ✅ Python 3.11.14 activated
 - ✅ notebooklm-py 0.3.2 installed
-- ⏳ Implement `generate_report()` in article.py
-- ⏳ Add `--format synthesis|report` CLI option
+- ✅ Implemented `generate_report()` in article.py
+- ✅ Added `--format synthesis|report` CLI option
 - ⏳ Test end-to-end generation
 
 **CLI Commands Available:**

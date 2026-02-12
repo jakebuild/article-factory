@@ -184,46 +184,52 @@ def generate_article_cmd(
     topic_id: int = typer.Argument(..., help="Topic ID to generate article for"),
     prompt: str = typer.Option(None, "--prompt", "-p", help="Article generation prompt"),
     prompt_file: str = typer.Option(None, "--prompt-file", "-f", help="Path to prompt file"),
+    format: str = typer.Option("synthesis", "--format", help="Generation format: synthesis or report"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
     """Generate long-form article from research using custom prompt."""
-    # Require either --prompt or --prompt-file
+    if format not in ["synthesis", "report"]:
+        typer.echo("Error: --format must be 'synthesis' or 'report'", err=True)
+        raise typer.Exit(code=1)
+
     if prompt is None and prompt_file is None:
         typer.echo("Error: Must specify --prompt or --prompt-file", err=True)
         raise typer.Exit(code=1)
-    
-    # Validate topic exists
+
     topic = database.get_topic(topic_id)
     if topic is None:
         typer.echo(f"Error: Topic {topic_id} not found", err=True)
         raise typer.Exit(code=1)
-    
+
     if not topic.get("notebook_id"):
         typer.echo(f"Error: Topic {topic_id} has no notebook - run research first", err=True)
         raise typer.Exit(code=1)
-    
-    typer.echo(f"Generating article for topic {topic_id}...")
-    
+
+    typer.echo(f"Generating article for topic {topic_id} (format: {format})...")
+
     try:
-        article_text = asyncio.run(generate_article(topic_id, prompt, prompt_file))
-        
-        # Export article to output directory
+        from article_factory.article import generate_article
+        import asyncio
+        article_text = asyncio.run(generate_article(topic_id, prompt, prompt_file, format=format))
+
         output_dir = get_output_dir(topic_id)
         article_path = export_article(topic_id, article_text, output_dir)
-        
+
         if json_output:
             result = {
                 "topic_id": topic_id,
                 "article_path": article_path,
                 "word_count": len(article_text.split()),
+                "format": format,
                 "status": "success"
             }
             typer.echo(json.dumps(result, indent=2))
         else:
             typer.echo(f"Article generated successfully!")
+            typer.echo(f"  Format: {format}")
             typer.echo(f"  Path: {article_path}")
             typer.echo(f"  Words: {len(article_text.split())}")
-    
+
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1)

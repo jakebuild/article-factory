@@ -5,7 +5,7 @@ import logging
 import os
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from article_factory.database import update_status, get_topic
 from article_factory.notebook_lm import NotebookLMClientWrapper
@@ -79,25 +79,79 @@ async def get_notebook_sources(notebook_id: str) -> list:
         logger.error(f"Failed to get notebook sources: {e}")
         return []
 
+
+async def generate_article_via_report(
+    notebook_id: str,
+    topic: str,
+    prompt: Optional[str] = None,
+    min_words: int = 2000,
+    max_words: int = 2500,
+) -> str:
+    """Generate article using report artifact.
+
+    Args:
+        notebook_id: NotebookLM notebook ID
+        topic: Topic name for article title
+        prompt: Optional custom prompt instructions
+        min_words: Minimum word count
+        max_words: Maximum word count
+
+    Returns:
+        Generated article as markdown string
+    """
+    client = NotebookLMClientWrapper()
+
+    article_prompt = prompt or f"""
+    Write a comprehensive article about {topic}.
+
+    Requirements:
+    - {min_words}-{max_words} words
+    - Well-structured with headings (H1, H2, H3)
+    - Include introduction, body sections, and conclusion
+    - Use prose over lists
+    - Cite sources using [source:id] format
+    """
+
+    async with await client.get_client() as api_client:
+        status = await api_client.artifacts.generate_report(
+            notebook_id,
+            custom_prompt=article_prompt
+        )
+
+        result = await api_client.artifacts.wait_for_completion(
+            notebook_id,
+            status.id
+        )
+
+        report_content = await api_client.artifacts.export_report(
+            notebook_id,
+            result.artifact_id
+        )
+
+    return report_content
+
+
 async def generate_article(
     topic_id: int,
     prompt: str,
     prompt_file: Optional[str] = None,
     min_words: int = 2000,
     max_words: int = 2500,
+    format: Literal["synthesis", "report"] = "synthesis",
 ) -> str:
     """Generate article for a topic using NotebookLM API with dynamic prompting.
-    
+
     Args:
         topic_id: Database ID of the topic
         prompt: Inline article generation prompt
         prompt_file: Optional path to file containing prompt
         min_words: Minimum word count for article
         max_words: Maximum word count for article
-        
+        format: Generation format - "synthesis" or "report"
+
     Returns:
         Generated article text
-        
+
     Raises:
         ValueError: If prompt is invalid or contains disallowed content
         RuntimeError: If article generation fails
@@ -108,21 +162,41 @@ async def generate_article(
             raise ValueError(f"Prompt file not found: {prompt_file}")
         with open(prompt_file, 'r') as f:
             resolved_prompt = f.read()
-    
+
     resolved_prompt = apply_safety_constraints(resolved_prompt)
-    
+
     topic = get_topic(topic_id)
     if topic is None:
         raise ValueError(f"Topic {topic_id} not found")
-    
+
     notebook_id = topic.get("notebook_id") if isinstance(topic, dict) else topic.notebook_id
     if not notebook_id:
         raise ValueError(f"Topic {topic_id} has no notebook_id - run research first")
-    
+
     update_status(topic_id, TopicStatus.PROCESSING)
-    
+
+    topic_name = topic.get('topic', 'article') if isinstance(topic, dict) else 'article'
+
+    if format == "report":
+        logger.info("Generating article via report artifact...")
+        try:
+            article_content = await generate_article_via_report(
+                notebook_id=notebook_id,
+                topic=topic_name,
+                prompt=resolved_prompt,
+                min_words=min_words,
+                max_words=max_words,
+            )
+            update_status(topic_id, TopicStatus.COMPLETED)
+            logger.info(f"Article generated successfully via report: {count_words(article_content)} words")
+            return article_content
+        except Exception as e:
+            logger.warning(f"Report generation failed: {e}")
+            logger.info("Falling back to synthesis format...")
+            format = "synthesis"
+
     sources = await get_notebook_sources(notebook_id)
-    
+
     full_prompt = f"""{resolved_prompt}
 
 Based on the notebook sources, write a comprehensive article that:
@@ -131,9 +205,9 @@ Based on the notebook sources, write a comprehensive article that:
 3. Uses only sources from the notebook
 4. Is well-structured with sections and transitions
 """
-    
+
     client = NotebookLMClientWrapper()
-    
+
     try:
         async with await client.get_client() as api_client:
             result = await api_client.chat.ask(
@@ -144,26 +218,20 @@ Based on the notebook sources, write a comprehensive article that:
                 article_content = result.answer
             else:
                 raise RuntimeError("Chat returned empty result - notebook may have no sources")
-            
+
     except Exception as e:
         logger.warning(f"Article generation via chat failed: {e}")
-        logger.info("Falling back to synthesis-based article...")
-        
-        # Fallback: Generate article from research synthesis file
-        import os
-        from datetime import datetime
-        from slugify import slugify as _slugify
-        
-        topic_name = topic.get('topic', 'article') if isinstance(topic, dict) else 'article'
+        logger.info("Falling back to synthesis file...")
+
         date = datetime.now().strftime('%Y-%m-%d')
+        from slugify import slugify as _slugify
         slug = _slugify(topic_name)
         synthesis_path = f"output/{date}/{slug}/research_synthesis.md"
-        
+
         if os.path.exists(synthesis_path):
             with open(synthesis_path, 'r') as f:
                 synthesis_content = f.read()
-            
-            # Convert synthesis to article format
+
             article_content = f"""# {topic_name}
 
 {synthesis_content}
@@ -174,25 +242,24 @@ Based on the notebook sources, write a comprehensive article that:
         else:
             update_status(topic_id, TopicStatus.FAILED)
             raise RuntimeError(
-                f"Article generation failed: chat API failed ({e}) and no synthesis available. "
-                "This requires notebooklm-py update for full article generation."
+                f"Article generation failed: chat API failed ({e}) and no synthesis available."
             )
-    
+
     try:
         article_content = enforce_source_citations(article_content, sources)
     except ValueError as e:
         logger.error(f"Citation enforcement failed: {e}")
         update_status(topic_id, TopicStatus.FAILED)
         raise
-    
+
     if not validate_article_length(article_content, min_words, max_words):
         update_status(topic_id, TopicStatus.FAILED)
         raise ValueError("Generated article does not meet length requirements")
-    
+
     update_status(topic_id, TopicStatus.COMPLETED)
-    
+
     logger.info(f"Article generated successfully for topic {topic_id}: {count_words(article_content)} words")
-    
+
     return article_content
 
 async def get_artifact_content(api_client, notebook_id: str, artifact_id: str) -> str:
