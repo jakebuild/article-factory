@@ -113,16 +113,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | CLI-01 | Phase 1 | Pending |
 | CLI-02 | Phase 1 | Pending |
-| CLI-03 | Phase 1 | Pending |
 | CLI-04 | Phase 1 | Pending |
 | CLI-05 | Phase 1 | Pending |
-| CLI-06 | Phase 1 | Pending |
 | CLI-07 | Phase 1 | Pending |
 | STATE-01 | Phase 1 | Pending |
 | STATE-02 | Phase 1 | Pending |
 | STATE-03 | Phase 1 | Pending |
 | STATE-04 | Phase 1 | Pending |
-| STATE-05 | Phase 2 | Pending |
 | NOTE-01 | Phase 2 | Pending |
 | NOTE-02 | Phase 2 | Pending |
 | NOTE-03 | Phase 2 | Pending |
@@ -130,6 +127,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTE-05 | Phase 2 | Pending |
 | ERR-01 | Phase 2 | Pending |
 | ERR-02 | Phase 2 | Pending |
+| STATE-05 | Phase 2 | Pending |
+| CLI-03 | Phase 3 | Pending |
+| CLI-06 | Phase 3 | Pending |
 | CONT-01 | Phase 3 | Pending |
 | CONT-02 | Phase 3 | Pending |
 | CONT-03 | Phase 3 | Pending |
