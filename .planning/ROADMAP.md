@@ -95,6 +95,20 @@ A programmable research-backed publishing engine that separates stable research 
 
 7. **Concurrent access works:** WAL mode enables multiple async operations to access database without locking conflicts
 
+**Plans:** 2 plans in 2 waves
+
+**Plan 01:** NotebookLM Integration
+- Creates NotebookLM client wrapper with async support
+- Implements notebook CRUD operations with slug format
+- Enables WAL mode for concurrent async access
+- Wave: 1 (no dependencies)
+
+**Plan 02:** Research Orchestration
+- Implements research workflow (trigger → poll → synthesis)
+- Adds rate limiting (max 3 concurrent, 2-5 min interval)
+- Adds circuit breaker for API failures
+- Wave: 2 (depends on Plan 01)
+
 ---
 
 ## Phase 3: Content Delivery
@@ -154,7 +168,7 @@ A programmable research-backed publishing engine that separates stable research 
 | Phase | Status | Plans |
 |-------|--------|-------|
 | 1 - Foundation | Planned | 01-setup, 02-cli |
-| 2 - Research Layer | Not Started | TBD |
+| 2 - Research Layer | Planned | 01-notebook, 02-research |
 | 3 - Content Delivery | Not Started | TBD |
 
 **Total:** 37 requirements across 3 phases
