@@ -2,6 +2,6 @@
 
 __version__ = "0.1.0"
 
-from article_factory.main import app
+from article_factory.cli import app
 
 __all__ = ["app"]

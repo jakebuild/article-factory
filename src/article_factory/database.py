@@ -108,7 +108,7 @@ def init_database():
 
 # CRUD Operations
 
-def create_topic(topic: str, prompt: str) -> Topic:
+def create_topic(topic: str, prompt: str) -> Optional[dict]:
     """Create a new topic with idempotent handling.
     
     Args:
@@ -116,31 +116,33 @@ def create_topic(topic: str, prompt: str) -> Topic:
         prompt: User-provided writing prompt
         
     Returns:
-        The created Topic object
+        Dictionary representation of the created Topic, or None on failure
     """
     with get_db_session() as session:
         # Check for existing topic with same name
         existing = session.query(Topic).filter(Topic.topic == topic).first()
         if existing:
             # Return existing topic (idempotent operation)
-            return existing
+            return existing.to_dict()
         
         new_topic = Topic(topic=topic, prompt=prompt)
         session.add(new_topic)
         session.flush()  # Get ID without committing
-        return new_topic
+        return new_topic.to_dict()
 
 
-def get_topic(id: int) -> Optional[Topic]:
-    """Retrieve a topic by ID."""
+def get_topic(id: int) -> Optional[dict]:
+    """Retrieve a topic by ID as a dictionary."""
     with get_db_session() as session:
-        return session.query(Topic).filter(Topic.id == id).first()
+        topic = session.query(Topic).filter(Topic.id == id).first()
+        return topic.to_dict() if topic else None
 
 
-def get_all_topics() -> List[Topic]:
-    """Retrieve all topics ordered by created_at descending."""
+def get_all_topics() -> List[dict]:
+    """Retrieve all topics ordered by created_at descending as dictionaries."""
     with get_db_session() as session:
-        return session.query(Topic).order_by(Topic.created_at.desc()).all()
+        topics = session.query(Topic).order_by(Topic.created_at.desc()).all()
+        return [t.to_dict() for t in topics]
 
 
 def update_status(id: int, new_status: TopicStatus) -> Optional[Topic]:
@@ -163,7 +165,7 @@ def update_status(id: int, new_status: TopicStatus) -> Optional[Topic]:
         return None
 
 
-def increment_retry(id: int) -> Optional[Topic]:
+def increment_retry(id: int) -> Optional[dict]:
     """Increment retry count atomically."""
     with get_db_session() as session:
         topic = session.query(Topic).filter(Topic.id == id).first()
@@ -172,7 +174,27 @@ def increment_retry(id: int) -> Optional[Topic]:
         
         topic.increment_retry()
         session.flush()
-        return topic
+        return topic.to_dict()
+
+
+def retry_topic(id: int) -> Optional[dict]:
+    """Increment retry count and set status to PENDING.
+    
+    Args:
+        id: Topic ID to retry
+        
+    Returns:
+        Dictionary representation of the updated Topic, or None on failure
+    """
+    with get_db_session() as session:
+        topic = session.query(Topic).filter(Topic.id == id).first()
+        if not topic:
+            return None
+        
+        topic.increment_retry()
+        topic.transition_to(TopicStatus.PENDING)
+        session.flush()
+        return topic.to_dict()
 
 
 def set_notebook_id(id: int, notebook_id: str) -> Optional[Topic]:
