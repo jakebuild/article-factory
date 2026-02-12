@@ -162,15 +162,35 @@ A programmable research-backed publishing engine that separates stable research 
 
 10. **Status accuracy works:** Unrecoverable failures are marked as FAILED status after exhausting retries
 
+**Plans:** 3 plans in 2 waves (to be planned)
+
+**Plan 01:** Article Generation & Dynamic Prompting
+- Implements article generation using NotebookLM API with user-provided prompts
+- Supports inline prompts (--prompt) and file-based prompts (--prompt-file)
+- Enforces source-only citations and safety constraints
+- Wave: 1 (depends on Phase 2 complete)
+
+**Plan 02:** Media Generation
+- Implements infographic image generation from notebook context
+- Implements executive audio briefing generation (8-10 minutes)
+- Wave: 2 (depends on Plan 01)
+
+**Plan 03:** Output & Error Handling
+- Implements structured output directory creation and artifact export
+- Adds batch processing for multiple topics
+- Adds JSON output mode for CLI
+- Implements retry logic (max 2 retries) and error logging
+- Wave: 2 (depends on Plan 01)
+
 ---
 
 ## Progress
 
 | Phase | Status | Plans |
 |-------|--------|-------|
-| 1 - Foundation | Planned | 01-setup, 02-cli |
-| 2 - Research Layer | Planned | 01-notebook, 02-research |
-| 3 - Content Delivery | Not Started | TBD |
+| 1 - Foundation | ✓ Complete | 01-setup, 02-cli |
+| 2 - Research Layer | ✓ Complete | 01-notebook, 02-research |
+| 3 - Content Delivery | Planned | 03-article, 03-media, 03-output |
 
 **Total:** 37 requirements across 3 phases
 
