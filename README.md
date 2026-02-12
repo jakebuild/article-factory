@@ -4,18 +4,28 @@ A **programmable research-backed publishing engine** powered entirely by Noteboo
 
 ## What It Does
 
-1. **Creates notebooks** on NotebookLM from your topics
-2. **Runs deep research** automatically on each topic
-3. **Generates content** using your custom prompts:
-   - Long-form articles (2,000-2,500 words)
-   - Infographic images
-   - Executive audio briefings (8-10 minutes)
-4. **Exports everything** to structured directories
+1. **Authenticates** with NotebookLM via browser login
+2. **Creates notebooks** on NotebookLM from your topics
+3. **Runs deep research** automatically on each topic
+4. **Generates content** using your custom prompts:
+   - Research synthesis from discovered sources
+   - Long-form articles (from synthesis)
+5. **Exports everything** to structured directories
 
 ## Installation
 
 ```bash
 pip install -e .
+```
+
+## Setup
+
+```bash
+# Authenticate with NotebookLM (opens browser)
+article-factory login
+
+# Check auth status
+article-factory auth
 ```
 
 ## Quick Start
@@ -24,40 +34,42 @@ pip install -e .
 # Create a topic
 article-factory create --topic "Machine Learning" --prompt "Write about ML fundamentals"
 
-# Run research
-article-farticle research 1
+# Run full async pipeline (returns task_id immediately)
+article-factory run 1 --prompt "Write about ML fundamentals"
 
-# Generate article with custom prompt
-article-factory article 1 --prompt "Write a beginner-friendly guide"
+# Check status
+article-factory status                    # All topics
+article-factory status <task-id>           # Specific task
 
-# Or batch process multiple topics
-article-factory batch topics.txt --prompt "Write about {topic}"
+# Cancel a running task
+article-factory cancel <task-id>
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `create` | Create a new topic for article generation |
-| `status` | Show status of all topics (with `--json` for structured output) |
+| `login` | Authenticate with NotebookLM via browser |
+| `auth` | Check authentication status |
+| `create` | Create a new topic |
+| `run` | Run full async pipeline (returns task_id immediately) |
+| `status` | Show status of topics/tasks (with `--json` for structured output) |
 | `retry` | Retry a failed topic |
-| `article` | Generate article from research (requires `--prompt` or `--prompt-file`) |
-| `batch` | Process multiple topics from a file |
+| `cancel` | Cancel a running task |
 | `version` | Show version |
 
 ## Output Structure
 
 ```
 YYYY-MM-DD/topic-slug/
-├── research_synthesis.md  # Research findings
-├── article.md             # Generated article
-├── infographic.png        # Generated image
-├── podcast.mp3            # Audio briefing (8-10 min)
+├── research_synthesis.md  # Research findings from deep research
+├── article.md            # Generated article (from synthesis)
 └── metadata.json          # Processing metadata
 ```
 
 ## Features
 
+- **Async Pipeline**: Non-blocking execution with task IDs
 - **Dynamic Prompting**: Inject prompts inline (`--prompt`) or from files (`--prompt-file`)
 - **Source Citations**: Generated content cites sources from your notebook
 - **Safety Constraints**: Built-in content safety checks
@@ -65,10 +77,39 @@ YYYY-MM-DD/topic-slug/
 - **Crash Recovery**: Resume from where you left off
 - **JSON Output**: `--json` flag for automation
 
+## Current Status
+
+### v1.0 MVP - SHIPPED ✅
+
+All core features working:
+- CLI commands (create, status, retry, cancel)
+- Notebook creation with timestamped slug format
+- Deep research triggering
+- Research synthesis generation
+- Article generation (via synthesis fallback)
+- SQLite state management
+
+### v1.1 Async Pipeline - IN PROGRESS 🚧
+
+Async execution with progress tracking:
+- `run` command returns task_id immediately ✅
+- `status <task-id>` shows progress ✅
+- `cancel <task-id>` works ✅
+- Progress notifications ⚠️ (partially)
+- Article generation via synthesis ✅ (935 words)
+
+**Known Limitations:**
+- Source auto-import requires notebooklm-py >= 0.2.0
+- Full article generation needs sources in notebook
+- Media generation (infographic/audio) pending testing
+
+See `.planning/STATE.md` for full roadmap.
+
 ## Requirements
 
 - Python 3.9+
-- NotebookLM API credentials
+- NotebookLM account
+- `pip install "notebooklm-py[browser]"` for authentication
 - See `pyproject.toml` for full dependencies
 
 ## License
