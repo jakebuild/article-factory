@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "article-factory"
+version = "0.1.0"
+description = "A programmable research-backed publishing engine"
+authors = ["Article Factory Team"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+typer = ">=0.12.0"
+sqlalchemy = ">=2.0.0"
+aiosqlite = ">=0.19.0"
+pydantic = ">=2.0.0"
+
+[tool.poetry.scripts]
+article-factory = "article_factory.main:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
