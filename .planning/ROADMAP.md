@@ -98,14 +98,15 @@ A programmable research-backed publishing engine that separates stable research 
 **Plans:** 2 plans in 2 waves
 
 **Plan 01:** NotebookLM Integration
-- Creates NotebookLM client wrapper with async support
-- Implements notebook CRUD operations with slug format
+- Integrates notebooklm-py SDK for NotebookLM API access
+- Implements notebook CRUD operations with slug format (YYYY-MM-DD__topic-slug)
 - Enables WAL mode for concurrent async access
+- User setup: Authenticate with NotebookLM (run `notebooklm login`)
 - Wave: 1 (no dependencies)
 
 **Plan 02:** Research Orchestration
 - Implements research workflow (trigger → poll → synthesis)
-- Adds rate limiting (max 3 concurrent, 2-5 min interval)
+- Adds rate limiting (max 3 concurrent, 2 min interval)
 - Adds circuit breaker for API failures
 - Wave: 2 (depends on Plan 01)
 
