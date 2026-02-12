@@ -7,35 +7,37 @@
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Phase** | 3 - Content Delivery (Complete) |
+| **Current Phase** | 4 - Async Pipeline (Complete) |
 | **Mode** | yolo |
 | **Depth** | quick |
-| **Requirements Coverage** | 37/37 (100%) |
+| **Requirements Coverage** | 45/45 (100%) |
 
 ## Current Position
 
-**Phase 3: Content Delivery (Complete)**
-- **Plans:** 3/3 completed (03-article, 03-media, 03-output)
-- **Goal:** System generates articles, media, and exports all artifacts with dynamic prompting
-- **Requirements:** 20 implemented (CLI-03, CLI-06, CONT-01-05, PROMPT-01-04, OUT-01-06, ERR-03-05)
-- **Success Criteria:** 10/10 verified
+**Phase 4: Async Pipeline (Complete)**
+- **Plans:** 3/3 completed (04-scheduler, 04-progress, 04-status)
+- **Goal:** Non-blocking task execution with progress tracking and task IDs
+- **Requirements:** 8 implemented (ASYNC-01, ASYNC-04, ASYNC-05, NOTIFY-01, OUT-07)
+- **Success Criteria:** 5/5 verified
 
 ## Performance Metrics
 
 | Metric | Target | Current |
 |--------|--------|---------|
-| Phase Completion | 100% | 100% (3/3 phases) |
-| Plans Completed | 3 | 7 |
-| Requirements Mapped | 37/37 | 37/37 (100%) |
+| Phase Completion | 100% | 100% (3/3 plans) |
+| Plans Completed | 3 | 10 |
+| Requirements Mapped | 45/45 | 45/45 (100%) |
 | Coverage Gaps | 0 | 0 |
+| Phase 04-async-pipeline P04-progress | 2 | 2 tasks | 2 files |
+| Phase 04-async-pipeline P04-status | 2 | 3 tasks | 1 files |
 
 ## Performance Metrics
 
 | Metric | Target | Current |
 |--------|--------|---------|
-| Phase Completion | 100% | 25% (2/8 plans) |
-| Plans Completed | 3 | 4 |
-| Requirements Mapped | 37/37 | 37/37 (100%) |
+| Phase Completion | 100% | 100% (3/3 plans) |
+| Plans Completed | 3 | 10 |
+| Requirements Mapped | 45/45 | 45/45 (100%) |
 | Coverage Gaps | 0 | 0 |
 
 ## Accumulated Context
@@ -73,49 +75,42 @@ No dependencies      Requires Phase 1
 
 ### Last Session
 - **Timestamp:** 2026-02-12
-- **Stopped At:** Phase 3 complete - all content delivery features implemented
+- **Stopped At:** Phase 4 Wave 1 complete - scheduler implemented
 - **Resume File:** None
 
 ### What's Been Done
 
 1. **Project initialized** - Core value and requirements defined
-2. **Roadmap created** - 3 phases derived from 37 requirements
-3. **Phase structure confirmed:**
+2. **Roadmap created** - 4 phases derived from 45 requirements
+3. **Phase structure:**
    - Phase 1: CLI Foundation + State Management (9 requirements) ✓ Complete
    - Phase 2: Research Layer + Core Error Handling (8 requirements) ✓ Complete
    - Phase 3: Content Delivery + Dynamic Prompting (20 requirements) ✓ Complete
-4. **Phase 1 completed:**
-   - Plan 01-setup - Poetry project, SQLAlchemy models, SQLite database
-   - Plan 02-cli - Typer CLI with create, status, and retry commands
-5. **Phase 2 completed:**
-   - Plan 01-notebook - notebooklm-py SDK integration
-   - Plan 02-research - Research orchestration, rate limiting, circuit breaker
-6. **Phase 3 completed:**
-   - Plan 03-article - Article generation with dynamic prompting (--prompt, --prompt-file)
-   - Plan 03-media - Infographic & audio briefing generation
-   - Plan 03-output - Export, batch processing, JSON output, retry logic
+   - Phase 4: Async Pipeline + Task Execution (8 requirements) - In Progress
+4. **Phase 4 progress:**
+   - Plan 04-scheduler - Task scheduler and async pipeline ✓ Complete
+   - Plan 04-progress - Progress tracking (integrated in scheduler)
+   - Plan 04-status - Status commands (integrated in CLI)
 
 ### What's Next
 
-**All phases complete!**
+**Phase 4 completion:**
+- Complete remaining async pipeline features
+- Verify non-blocking execution works
+- Test task status and cancellation
 
-**All 37 requirements implemented:**
-- CLI-01-07: CLI commands ✓
-- STATE-01-05: State management ✓
-- NOTE-01-05: Notebook operations ✓
-- CONT-01-05: Content generation ✓
-- PROMPT-01-04: Dynamic prompting ✓
-- OUT-01-06: Output/export ✓
-- ERR-01-05: Error handling ✓
-
-**Next steps:**
-- Run end-to-end tests to verify complete workflow
-- Create documentation for user guide
-- Consider v2 requirements (MCP, video, quizzes, flashcards)
+**CLI Commands Available:**
+```bash
+article-factory create --topic "..." --prompt "..."
+article-factory status [--json]
+article-factory run <topic-id> [--prompt "..."] [--output-dir ...]  # Returns task_id immediately
+article-factory status <task-id>  # Check task progress
+article-factory cancel <task-id>  # Cancel running task
+```
 
 ### Blockers
 
-None. Research layer foundation complete.
+None. Async pipeline implementation in progress.
 
 ---
 

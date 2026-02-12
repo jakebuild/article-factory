@@ -7,6 +7,7 @@ from typing import Optional, List
 
 from article_factory.database import get_db_session
 from article_factory.models import Task, TaskStatus, Topic, TopicStatus
+from article_factory.notifications import notify_progress, notify_complete, notify_error, notify_cancelled
 
 
 def generate_task_id() -> str:
@@ -14,7 +15,7 @@ def generate_task_id() -> str:
     return str(uuid.uuid4())
 
 
-def create_task(topic_id: int, output_dir: str = None, prompt: str = None, prompt_file: str = None) -> Task:
+def create_task(topic_id: int, output_dir: str = None, prompt: str = None, prompt_file: str = None) -> str:
     """Create a new task with PENDING status.
     
     Args:
@@ -24,7 +25,7 @@ def create_task(topic_id: int, output_dir: str = None, prompt: str = None, promp
         prompt_file: Optional path to prompt file
         
     Returns:
-        Task object
+        task_id (UUID string)
     """
     with get_db_session() as session:
         task = Task(
@@ -39,32 +40,62 @@ def create_task(topic_id: int, output_dir: str = None, prompt: str = None, promp
         )
         session.add(task)
         session.flush()
-        return task
+        task_id = task.id
+        return task_id
 
 
-def get_task(task_id: str) -> Optional[Task]:
+def get_task(task_id: str) -> Optional[dict]:
     """Get a task by ID.
     
     Args:
         task_id: The task ID (UUID)
         
     Returns:
-        Task object or None
+        Task dict or None
     """
     with get_db_session() as session:
         task = session.query(Task).filter(Task.id == task_id).first()
-        return task
+        if task:
+            return {
+                "id": task.id,
+                "topic_id": task.topic_id,
+                "status": task.status.value if task.status else None,
+                "current_stage": task.current_stage,
+                "progress_percent": task.progress_percent,
+                "error_message": task.error_message,
+                "output_dir": task.output_dir,
+                "prompt": task.prompt,
+                "prompt_file": task.prompt_file,
+                "created_at": task.created_at.isoformat() if task.created_at else None,
+                "updated_at": task.updated_at.isoformat() if task.updated_at else None,
+            }
+        return None
 
 
-def get_all_tasks() -> List[Task]:
+def get_all_tasks() -> List[dict]:
     """Get all tasks ordered by created_at descending.
     
     Returns:
-        List of Task objects
+        List of Task dicts
     """
     with get_db_session() as session:
         tasks = session.query(Task).order_by(Task.created_at.desc()).all()
-        return tasks
+        return [
+            {
+                "id": task.id,
+                "topic_id": task.topic_id,
+                "status": task.status.value if task.status else None,
+                "current_stage": task.current_stage,
+                "progress_percent": task.progress_percent,
+                "error_message": task.error_message,
+                "output_dir": task.output_dir,
+                "prompt": task.prompt,
+                "prompt_file": task.prompt_file,
+                "created_at": task.created_at.isoformat() if task.created_at else None,
+                "updated_at": task.updated_at.isoformat() if task.updated_at else None,
+            }
+            for task in tasks
+        ]
 
 
 def update_task_progress(
@@ -94,6 +125,8 @@ def update_task_progress(
             if message:
                 task.error_message = message
             session.flush()
+            # Send progress notification
+            notify_progress(task_id, stage.value, progress_percent, message)
             return task
         return None
 
@@ -138,11 +171,12 @@ def run_pipeline_async(
     Returns:
         task_id (UUID string)
     """
-    task = create_task(topic_id, output_dir, prompt, prompt_file)
-    task_id = task.id
+    task_id = create_task(topic_id, output_dir, prompt, prompt_file)
     
-    # Schedule async execution
-    asyncio.create_task(_execute_pipeline(task_id))
+    # Schedule async execution in a background thread
+    import threading
+    thread = threading.Thread(target=lambda: asyncio.run(_execute_pipeline(task_id)), daemon=True)
+    thread.start()
     
     return task_id
 
@@ -175,6 +209,8 @@ async def _execute_pipeline(task_id: str) -> None:
         
         topic_id = task.topic_id
         output_dir = task.output_dir
+        task_prompt = task.prompt
+        task_prompt_file = task.prompt_file
         
         # Get topic info
         with get_db_session() as session:
@@ -215,10 +251,10 @@ async def _execute_pipeline(task_id: str) -> None:
         article_text = None
         
         # Stage: ARTICLE_DONE
-        if task.prompt or task.prompt_file:
+        if task_prompt or task_prompt_file:
             update_task_progress(task_id, TaskStatus.ARTICLE_DONE, 80, "Generating article")
             from article_factory.article import generate_article
-            article_text = await generate_article(topic_id, task.prompt, task.prompt_file)
+            article_text = await generate_article(topic_id, task_prompt, task_prompt_file)
         
         # Stage: MEDIA_DONE
         update_task_progress(task_id, TaskStatus.MEDIA_DONE, 90, "Generating media")
@@ -243,16 +279,15 @@ async def _execute_pipeline(task_id: str) -> None:
         from article_factory.output import export_all_artifacts
         export_all_artifacts(topic_id, article_text, synthesis)
         
-        print(f"[OK] Task {task_id} completed successfully!")
-        print(f"   Output: {output_dir or get_default_output_dir(topic_id)}")
+        notify_complete(task_id, output_dir or get_default_output_dir(topic_id))
         
     except asyncio.CancelledError:
         update_task_progress(task_id, TaskStatus.CANCELLED, 0, "Task cancelled")
-        print(f"Task {task_id} cancelled")
+        notify_cancelled(task_id)
         
     except Exception as e:
         update_task_progress(task_id, TaskStatus.FAILED, 0, str(e))
-        print(f"[ERROR] Task {task_id} failed: {e}")
+        notify_error(task_id, str(e))
 
 
 def get_default_output_dir(topic_id: int) -> str:

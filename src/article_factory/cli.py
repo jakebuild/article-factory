@@ -284,17 +284,17 @@ def show_status(
             raise typer.Exit(code=1)
         
         if json_output:
-            typer.echo(json.dumps(task.to_dict(), indent=2, default=str))
+            typer.echo(json.dumps(task, indent=2, default=str))
         else:
-            typer.echo(f"Task: {task.id}")
-            typer.echo(f"  Topic: {task.topic_id}")
-            typer.echo(f"  Status: {task.status.value if task.status else 'UNKNOWN'}")
-            typer.echo(f"  Stage: {task.current_stage or 'N/A'}")
-            typer.echo(f"  Progress: {task.progress_percent}%")
-            if task.error_message:
-                typer.echo(f"  Error: {task.error_message}")
-            if task.output_dir:
-                typer.echo(f"  Output: {task.output_dir}")
+            typer.echo(f"Task: {task['id']}")
+            typer.echo(f"  Topic: {task['topic_id']}")
+            typer.echo(f"  Status: {task['status'] or 'UNKNOWN'}")
+            typer.echo(f"  Stage: {task['current_stage'] or 'N/A'}")
+            typer.echo(f"  Progress: {task['progress_percent']}%")
+            if task.get('error_message'):
+                typer.echo(f"  Error: {task['error_message']}")
+            if task.get('output_dir'):
+                typer.echo(f"  Output: {task['output_dir']}")
     else:
         # Show all tasks
         tasks = get_all_tasks()
@@ -307,9 +307,9 @@ def show_status(
         typer.echo("-" * len(header))
         
         for task in tasks:
-            status = task.status.value if task.status else "UNKNOWN"
-            stage = (task.current_stage or "N/A")[:20]
-            typer.echo(f"{task.id:<38} {status:<12} {stage:<22} {task.progress_percent}%")
+            status = task['status'] if task['status'] else "UNKNOWN"
+            stage = (task['current_stage'] or "N/A")[:20]
+            typer.echo(f"{task['id']:<38} {status:<12} {stage:<22} {task['progress_percent']}%")
 
 
 @app.command("cancel")
