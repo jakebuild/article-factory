@@ -14,11 +14,10 @@
 
 ## Current Position
 
-**Phase 4: Async Pipeline (Diagnosed - Needs Fixes)**
-- **Plans:** 3/3 completed (04-scheduler, 04-progress, 04-status)
+**Phase 4: Async Pipeline (Gaps Closed)**
+- **Plans:** 4/4 completed (04-scheduler, 04-progress, 04-status, 04-gap-closure)
 - **Goal:** Non-blocking task execution with progress tracking and task IDs
-- **Requirements:** Partial - ASYNC-01 blocked by notebooklm-py version
-- **Success Criteria:** 4/5 pass, 2 skipped, 1 blocked
+- **Status:** ✅ Core features working, external SDK limitations documented
 
 ## Performance Metrics
 
@@ -110,15 +109,16 @@ article-factory cancel <task-id>  # Cancel running task
 
 ### Blockers
 
-**Critical:**
-- ASYNC-01 Article Generation: Requires `artifacts.generate` method from notebooklm-py >= 0.2.0 (current: 0.1.1)
-- Source Import: `research.import_sources` RPC (LBwxtb) not available in current SDK version
+**External SDK Limitations:**
+- **Article Generation:** No `generate_article` method in notebooklm-py (any version)
+- **Python Version:** 3.9.6 blocks upgrade to SDK 0.2.0+ (latest 0.3.2)
+- **Source Import:** `import_sources` EXISTS in SDK 0.1.1, needs Python 3.10+ to test
 
 **Workaround in place:**
 - Research workflow: ✅ Works (found 44 sources)
 - Synthesis generation: ✅ Works (saves discovered sources to file)
 - Article generation: ⚠️ Works via synthesis fallback (935 words, < 2000 min)
-- Infographic/Audio: ⚠️ Not tested (SDK rate_limiter issue)
+- Infographic/Audio: ⚠️ Not tested (needs API credentials)
 
 ---
 

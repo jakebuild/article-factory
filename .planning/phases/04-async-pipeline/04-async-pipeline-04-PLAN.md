@@ -35,18 +35,29 @@ Close UAT gaps for Phase 4 (async pipeline) by addressing the one actionable iss
 
 | Gap | Status | Actionable? |
 |-----|--------|-------------|
-| Article Generation (fallback) | ✅ Fixed | No |
-| Source Import RPC | ❌ Blocked | No (SDK limitation) |
-| Article Length | ⚠️ Blocked | No (depends on SDK) |
+| Article Generation (fallback) | ✅ Works | Yes - short content only |
+| Source Import RPC | ✅ EXISTS | No - already in SDK |
+| Article Length | ⚠️ Blocked | No (SDK limitation - no generate_article) |
 | Media Generation | ⚠️ Untested | Yes |
 | slugify Imports | ✅ Fixed | No |
 | Scheduler Error Handling | ✅ Fixed | No |
 
-## Root Cause: SDK Limitations
+## Root Cause: SDK Reality Check
 
-The `notebooklm-py` SDK version 0.1.1 lacks:
-1. `research.import_sources` RPC (LBwxtb) - needed for source import
-2. `artifacts.generate` method - needed for full article generation
+**NOT a version issue:**
+
+1. ✅ `import_sources` **EXISTS** in notebooklm-py 0.1.1
+   - Was wrongly marked as "missing" in UAT
+   - Works in SDK, may need API credentials testing
+
+2. ❌ `generate_article` **DOES NOT EXIST** in any version
+   - SDK simply doesn't provide article generation
+   - Available: audio, video, quiz, flashcards, report, mind-map, etc.
+   - Use `chat.ask()` for article generation (needs imported sources)
+
+3. 🔒 Python 3.9.6 blocks upgrade to 0.2.0+
+   - Newer SDK versions require Python 3.10+
+   - Upgrade Python to get latest SDK features
 
 **Current workaround:** Synthesis fallback generates short articles (935 words vs 2000+ required)
 
@@ -86,37 +97,29 @@ Issue: `rate_limiter.acquire()` coroutine issue
     
     ## notebooklm-py SDK Limitations (v0.1.1)
     
-    ### Blocked Features (No Code Fix Available)
-    
-    1. **Source Import RPC**
-       - Method: `research.import_sources` (LBwxtb)
-       - Status: Not implemented in SDK
-       - Impact: Cannot auto-import discovered sources
-       - Workaround: Manual source import via Dashboard, or wait for SDK update
-       - ETA: Unknown - depends on Google/NotebookLM API availability
-    
-    2. **Full Article Generation**
-       - Required: `artifacts.generate` method
-       - Status: Not implemented in SDK
-       - Impact: Chat API returns empty (no imported sources to reference)
-       - Current: Synthesis fallback generates 935 words (target: 2000+)
-       - Workaround: Use synthesis fallback for short content, wait for SDK for full articles
-       - ETA: Unknown
-    
-    ### Media Generation Issue
-    
-    1. **rate_limiter.acquire() Coroutine**
-       - Location: `src/article_factory/media.py`, `audio.py`
-       - Issue: Likely sync call to async function
-       - Status: Needs testing with real API credentials
-       - Fix: Add await if async, or use asyncio.run() wrapper
-    
-    ### Recommendations
-    
-    1. Monitor notebooklm-py releases for v0.2.0+
-    2. Consider filing issue on notebooklm-py GitHub
-    3. For v1.1 release: Ship with known limitations documented
-    4. For v2.0: Evaluate alternative approaches if SDK remains limited
+### Blocked Features (No Code Fix Available)
+
+**1. Full Article Generation**
+- Required: `artifacts.generate` method
+- Status: **Not implemented in ANY SDK version**
+- Impact: No API method to generate full articles
+- Available artifacts: audio, video, quiz, flashcards, infographic, report, mind-map, data-table, slide-deck, study-guide
+- Workaround: Use `chat.ask()` for article Q&A (requires imported sources for full output)
+- ETA: Unknown - may never be added
+
+**2. Source Import (PYTHON VERSION BLOCKED)**
+- Method: `research.import_sources`
+- Status: ✅ **EXISTS in SDK 0.1.1**
+- Issue: Python 3.9.6 blocks upgrade to 0.2.0+ (latest: 0.3.2)
+- Impact: May work in 0.1.1, needs API credentials testing
+- Fix: Upgrade Python to 3.10+ to use latest SDK
+
+### Recommendations
+
+1. Upgrade Python from 3.9.6 → 3.10+ to get notebooklm-py 0.3.2
+2. Test `import_sources` in current SDK (0.1.1)
+3. Accept: No `generate_article` API exists - use `chat.ask()` workaround
+4. For v1.1: Ship with known limitations documented
   </action>
   <verify>
     cat .planning/phases/04-async-pipeline/SDK-LIMITATIONS.md
