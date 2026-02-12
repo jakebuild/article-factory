@@ -19,7 +19,7 @@ A programmable research-backed publishing engine that separates stable research 
 
 ## Phase 1: Foundation
 
-**Goal:** User can install article-factory and manage topic lifecycle with persistent state
+**Goal:** User can install CLI and manage topic lifecycle with persistent state
 
 **Dependencies:** None (this is the starting phase)
 
@@ -34,13 +34,26 @@ A programmable research-backed publishing engine that separates stable research 
 - STATE-03: System supports crash recovery (idempotent operations)
 - STATE-04: System maintains retry_count for failed operations
 
+**Plans:** 2 plans in 2 waves
+
+**Plan 01:** Project Setup + State Management
+- Creates Poetry project structure with pyproject.toml
+- Defines SQLAlchemy Topic model with state machine
+- Implements SQLite database with crash recovery support
+- Wave: 1 (no dependencies)
+
+**Plan 02:** CLI Commands
+- Implements Typer CLI application with create, status, retry commands
+- Adds progress feedback during operations
+- Wave: 2 (depends on Plan 01)
+
 **Success Criteria:**
 
 1. **Installation works:** User runs `pip install article-factory` and the CLI becomes available via `article-factory` command
 
-2. **Topic creation works:** User runs `article-factory create --topic "machine learning" --prompt "Write about ML"` and a new topic is created with status "PENDING"
+2. **Topic creation works:** User runs `article-factory create --topic "machine learning" --prompt "Write about ML"` and a new topic is created with status "NEW"
 
-3. **Status tracking works:** User runs `article-factory status` and sees all topics with their current status (PENDING, PROCESSING, COMPLETED, FAILED)
+3. **Status tracking works:** User runs `article-factory status` and sees all topics with their current status (NEW, PENDING, PROCESSING, COMPLETED, FAILED)
 
 4. **Retry mechanism works:** User runs `article-factory retry <topic-id>` and failed topics are re-queued with incremented retry_count
 
@@ -138,11 +151,11 @@ A programmable research-backed publishing engine that separates stable research 
 
 ## Progress
 
-| Phase | Status | Requirements |
-|-------|--------|--------------|
-| 1 - Foundation | Not Started | 9 |
-| 2 - Research Layer | Not Started | 8 |
-| 3 - Content Delivery | Not Started | 20 |
+| Phase | Status | Plans |
+|-------|--------|-------|
+| 1 - Foundation | Planned | 01-setup, 02-cli |
+| 2 - Research Layer | Not Started | TBD |
+| 3 - Content Delivery | Not Started | TBD |
 
 **Total:** 37 requirements across 3 phases
 
@@ -150,4 +163,6 @@ A programmable research-backed publishing engine that separates stable research 
 
 ## Next Steps
 
-Ready for planning. Begin with: `/gsd-plan-phase 1`
+Execute Phase 1 plans:
+- Execute: `/gsd-execute-phase 1` (runs all plans)
+- Or individually: `/gsd-execute-phase 1 --plan 01` then `/gsd-execute-phase 1 --plan 02`
