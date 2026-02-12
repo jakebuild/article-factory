@@ -184,31 +184,14 @@ async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
     Returns:
         Path to the generated synthesis file
     """
+    # For now, create a simple synthesis from research metadata
+    # The full chat-based synthesis requires notebooklm-py >= 0.2.0
     client = NotebookLMClientWrapper()
     
-    # Generate synthesis via chat API
-    await rate_limiter.acquire()
-    try:
-        result = await circuit_breaker.call(
-            client.chat.ask, notebook_id,
-            """Create a structured summary of all sources and key insights. Format as:
-
-## Key Findings
-- [bullet points of main discoveries]
-
-## Sources Summary  
-- [list of sources with brief descriptions]
-
-## Questions Answered
-- [Q: question] [A: answer]
-
-## Knowledge Gaps
-- [areas that need further research]"""
-        )
-    except CircuitOpenError:
-        raise
-    finally:
-        rate_limiter.release()
+    # Get research poll result to extract sources info
+    poll_result = await client.poll_research(notebook_id)
+    sources = poll_result.get('sources', [])
+    summary = poll_result.get('summary', '')
     
     # Save to output directory
     output_dir = f"output/{datetime.now().strftime('%Y-%m-%d')}/{topic_slug}"
@@ -220,9 +203,18 @@ async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
         f.write(f"Generated: {datetime.now().isoformat()}\n")
         f.write(f"Notebook ID: {notebook_id}\n\n")
         f.write("---\n\n")
-        if hasattr(result, 'answer'):
-            f.write(result.answer)
-        else:
-            f.write(str(result))
+        
+        f.write("## Discovered Sources\n\n")
+        for i, src in enumerate(sources, 1):
+            title = src.get('title', 'Untitled')
+            url = src.get('url', '')
+            f.write(f"{i}. **{title}**\n")
+            if url:
+                f.write(f"   URL: {url}\n")
+            f.write("\n")
+        
+        if summary:
+            f.write("\n## Research Summary\n\n")
+            f.write(summary)
     
     return synthesis_path

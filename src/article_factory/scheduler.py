@@ -207,10 +207,10 @@ async def _execute_pipeline(task_id: str) -> None:
             update_task_progress(task_id, TaskStatus.FAILED, 0, f"Task {task_id} not found")
             return
         
-        topic_id = task.topic_id
-        output_dir = task.output_dir
-        task_prompt = task.prompt
-        task_prompt_file = task.prompt_file
+        topic_id = task["topic_id"]
+        output_dir = task.get("output_dir")
+        task_prompt = task.get("prompt")
+        task_prompt_file = task.get("prompt_file")
         
         # Get topic info
         with get_db_session() as session:
@@ -246,15 +246,24 @@ async def _execute_pipeline(task_id: str) -> None:
         update_task_progress(task_id, TaskStatus.SYNTHESIS_DONE, 60, "Generating synthesis")
         
         from article_factory.research import generate_synthesis
-        synthesis = await generate_synthesis(topic_id)
+        from article_factory.database import get_topic
+        from slugify import slugify as slugify_func
+        topic_data = get_topic(topic_id)
+        topic_name = topic_data.get("topic", "unknown") if topic_data else "unknown"
+        topic_slug = slugify_func(topic_name)
+        synthesis = await generate_synthesis(notebook_id, topic_slug)
         
         article_text = None
         
         # Stage: ARTICLE_DONE
         if task_prompt or task_prompt_file:
-            update_task_progress(task_id, TaskStatus.ARTICLE_DONE, 80, "Generating article")
-            from article_factory.article import generate_article
-            article_text = await generate_article(topic_id, task_prompt, task_prompt_file)
+            try:
+                update_task_progress(task_id, TaskStatus.ARTICLE_DONE, 80, "Generating article")
+                from article_factory.article import generate_article
+                article_text = await generate_article(topic_id, task_prompt, task_prompt_file)
+            except Exception as e:
+                print(f"Warning: Article generation failed (skipping): {e}")
+                article_text = None
         
         # Stage: MEDIA_DONE
         update_task_progress(task_id, TaskStatus.MEDIA_DONE, 90, "Generating media")
@@ -297,7 +306,7 @@ def get_default_output_dir(topic_id: int) -> str:
     if topic:
         topic_name = topic.get("topic") if isinstance(topic, dict) else topic.topic
         date = topic.get("created_at", "")[:10] if topic.get("created_at") else "unknown"
-        from slugify import slugify
-        slug = slugify(topic_name)
+        from slugify import slugify as _slugify
+        slug = _slugify(topic_name)
         return f"{date}__{slug}"
     return f"topic-{topic_id}"

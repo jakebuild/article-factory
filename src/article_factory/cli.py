@@ -2,13 +2,12 @@
 
 import asyncio
 import json
-from typing import Optional
-
 import typer
 
 from article_factory import database
 from article_factory.models import TopicStatus
 from article_factory.article import generate_article
+from article_factory.auth import login, check_auth_status, configure_env_var
 
 app = typer.Typer(
     name="article-factory",
@@ -19,7 +18,7 @@ app = typer.Typer(
 
 def slugify(text: str) -> str:
     """Convert topic to URL-safe slug."""
-    import slugify as _slugify
+    from slugify import slugify as _slugify
     return _slugify(text, max_length=80)
 
 
@@ -362,3 +361,39 @@ def batch_topics(
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1)
+
+
+@app.command("login")
+def login_cmd():
+    """Log in to NotebookLM via browser.
+
+    Opens a browser window for Google login. After logging in,
+    press ENTER in the terminal to save authentication.
+
+    The authentication is saved to ~/.article-factory/storage_state.json
+    and article-factory will automatically use it for all commands.
+    """
+    success = login()
+    if success:
+        typer.echo("\n[green]Login successful![/green]")
+        configure_env_var()
+    else:
+        typer.echo("\n[red]Login failed or cancelled.[/red]")
+
+
+@app.command("auth")
+def auth_status():
+    """Check authentication status and show configuration options."""
+    status = check_auth_status()
+
+    if status["status"] == "inline":
+        typer.echo("Authentication: [green]Configured via NOTEBOOKLM_AUTH_JSON[/green]")
+        typer.echo("Source: Environment variable")
+    elif status["status"] == "configured":
+        typer.echo("Authentication: [green]Configured[/green]")
+        typer.echo(f"Storage: {status['path']}")
+        typer.echo("\nTo use in CI/CD or other environments:")
+        configure_env_var()
+    else:
+        typer.echo("Authentication: [yellow]Not configured[/yellow]")
+        typer.echo("\nRun 'article-factory login' to authenticate with NotebookLM.")

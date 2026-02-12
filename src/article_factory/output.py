@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 def slugify(text: str) -> str:
     """Convert text to URL-safe slug."""
-    import slugify as _slugify
+    import sys
+    slugify_mod = sys.modules.get('slugify') or __import__('slugify')
+    _slugify = getattr(slugify_mod, 'slugify', None) or __import__('slugify').slugify
     return _slugify(text, max_length=80)
 
 def get_output_dir(topic_id: int) -> str:

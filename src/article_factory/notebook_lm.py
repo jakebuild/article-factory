@@ -1,32 +1,35 @@
 """NotebookLM API client wrapper for async operations."""
 import os
 import json
+from pathlib import Path
 from typing import Optional
 from notebooklm import NotebookLMClient
+
+ARTICLE_FACTORY_AUTH_PATH = Path.home() / ".article-factory" / "storage_state.json"
 
 
 class NotebookLMClientWrapper:
     """Wrapper around notebooklm-py NotebookLMClient."""
-    
+
     def __init__(self):
-        # Load auth from env var or storage
         auth_json = os.environ.get("NOTEBOOKLM_AUTH_JSON")
         if auth_json:
-            # Write temp file for from_storage() to read
             self._auth_path = "/tmp/nblm_auth.json"
             with open(self._auth_path, "w") as f:
                 f.write(auth_json)
+        elif ARTICLE_FACTORY_AUTH_PATH.exists():
+            self._auth_path = str(ARTICLE_FACTORY_AUTH_PATH)
         else:
             self._auth_path = None
-    
+
     async def get_client(self) -> NotebookLMClient:
         """Get authenticated NotebookLM client."""
         if not self._auth_path and not os.environ.get("NOTEBOOKLM_AUTH_JSON"):
             raise ValueError(
                 "NotebookLM authentication not configured. "
-                "Set NOTEBOOKLM_AUTH_JSON env var or run `notebooklm login`"
+                "Run 'article-factory login' or set NOTEBOOKLM_AUTH_JSON"
             )
-        
+
         path = self._auth_path if self._auth_path else None
         client = await NotebookLMClient.from_storage(path)
         return client
@@ -84,3 +87,9 @@ class NotebookLMClientWrapper:
                 notebook_id, output_path, artifact_id
             )
             return path
+
+    async def import_sources(self, notebook_id: str, task_id: str, sources: list) -> list:
+        """Import research sources into notebook."""
+        async with await self.get_client() as client:
+            imported = await client.research.import_sources(notebook_id, task_id, sources)
+            return imported
