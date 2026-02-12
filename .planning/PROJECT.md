@@ -12,28 +12,94 @@ A programmable research-backed publishing engine that separates stable research 
 
 ### Validated
 
-(None yet — ship to validate)
+All v1.0 requirements shipped and validated:
+
+- [x] CLI commands: create, status, retry, article, batch, version
+- [x] JSON output mode for structured data
+- [x] SQLite state management with crash recovery
+- [x] Notebook creation with timestamped slug format (YYYY-MM-DD__topic-slug)
+- [x] Async deep research triggering via NotebookLM API
+- [x] Research artifact polling with 45-minute timeout
+- [x] Structured research synthesis generation
+- [x] Notebook preservation for knowledge compounding
+- [x] Long-form article generation (2,000-2,500 words) with custom prompts
+- [x] Source citation enforcement in generated content
+- [x] Infographic image generation from notebook context
+- [x] Executive audio briefing generation (8-10 minutes)
+- [x] Structured output directory (YYYY-MM-DD/topic-slug/)
+- [x] Export formats: research_synthesis.md, article.md, infographic.png, podcast.mp3, metadata.json
+- [x] Rate limiting (max 3 concurrent, 2-min interval)
+- [x] Circuit breaker for API failures
+- [x] Retry logic (max 2 retries)
+- [x] Error logging with context
+- [x] FAILED status for unrecoverable failures
+- [x] Safety constraints for prompts
 
 ### Active
 
-- [ ] Create isolated notebooks per topic with timestamped slug format
-- [ ] Trigger async deep research via NotebookLM API
-- [ ] Poll and wait for research artifact completion (45min timeout)
-- [ ] Generate structured research synthesis
-- [ ] Generate long-form article using user-provided dynamic prompt (2,000-2,500 words)
-- [ ] Generate infographic image from notebook context
-- [ ] Generate executive audio briefing (8-10 minutes)
-- [ ] Export all artifacts locally with structured output format
-- [ ] Preserve notebooks permanently for knowledge compounding
-- [ ] Support dynamic prompt injection via inline, file, or named templates
+Next milestone requirements (TBD — define in v1.1 planning):
+
+**Suggested from v2 deferred:**
+
+- [ ] MCP server integration for AI agent compatibility
+- [ ] Quiz generation from research synthesis
+- [ ] Flashcard generation from key insights
+- [ ] Newsletter-style deep dive format
+- [ ] SEO-optimized article templates
 
 ### Out of Scope
+
+Confirmed still out of scope:
 
 - External API integrations beyond NotebookLM
 - Web crawling or manual source import
 - Hard-coded article templates (all prompts user-defined)
 - Real-time collaboration features
 - Multi-user accounts
+
+## Current State (v1.0 SHIPPED)
+
+**Shipped:** 2026-02-12
+**Tech Stack:** Python + NotebookLMClient SDK
+**LOC:** ~2,029 Python
+**Phases:** 3 complete
+**Plans:** 7 executed
+**Requirements:** 37/37 implemented
+
+### CLI Commands
+
+```bash
+article-factory create --topic "..." --prompt "..."
+article-factory status [--json]
+article-factory retry <id>
+article-factory article <id> [--prompt "..." | --prompt-file ...] [--json]
+article-factory batch <topics-file> [--prompt "..." | --prompt-file ...] [--json]
+article-factory version
+```
+
+### Output Structure
+
+```
+YYYY-MM-DD/topic-slug/
+├── research_synthesis.md
+├── article.md
+├── infographic.png
+├── podcast.mp3
+└── metadata.json
+```
+
+## Key Decisions
+
+| Decision | Rationale | Outcome |
+|----------|-----------|---------|
+| CLI-only interface | Simplicity, automation-friendly, no GUI overhead | ✅ Confirmed |
+| SQLite state store | Crash recovery, retry management, idempotent operations | ✅ Confirmed |
+| Dynamic prompt architecture | Flexibility for content experimentation and A/B testing | ✅ Confirmed |
+| Max 3 concurrent topics | Balance throughput with API rate limits | ✅ Confirmed |
+| WAL mode for SQLite | Concurrent async access without locking | ✅ Confirmed |
+| notebooklm-py SDK | Official SDK for NotebookLM API integration | ✅ Confirmed |
+| Rate limiting + circuit breaker | API resilience and key protection | ✅ Confirmed |
+| Research orchestration workflow | Async start/poll/run patterns for resilience | ✅ Confirmed |
 
 ## Context
 
@@ -47,14 +113,6 @@ The system uses the NotebookLMClient Python SDK exclusively. All interactions fl
 - **Timeout**: 45 minutes per artifact, max 2 retries per stage
 - **Output Format**: Structured `YYYY-MM-DD/topic-slug/` directories
 
-## Key Decisions
-
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| CLI-only interface | Simplicity, automation-friendly, no GUI overhead | — Pending |
-| SQLite state store | Crash recovery, retry management, idempotent operations | — Pending |
-| Dynamic prompt architecture | Flexibility for content experimentation and A/B testing | — Pending |
-| Max 3 concurrent topics | Balance throughput with API rate limits | — Pending |
-
 ---
-*Last updated: 2026-02-12 after initialization*
+
+*Last updated: 2026-02-12 after v1.0 milestone completion*
