@@ -94,9 +94,11 @@ No dependencies      Requires Phase 1
 ### What's Next
 
 **Phase 4 completion:**
-- Complete remaining async pipeline features
-- Verify non-blocking execution works
-- Test task status and cancellation
+- ✅ Python 3.11.14 activated
+- ✅ notebooklm-py 0.3.2 installed
+- ⏳ Implement `generate_report()` in article.py
+- ⏳ Add `--format synthesis|report` CLI option
+- ⏳ Test end-to-end generation
 
 **CLI Commands Available:**
 ```bash
@@ -109,10 +111,13 @@ article-factory cancel <task-id>  # Cancel running task
 
 ### Blockers
 
-**External SDK Limitations:**
-- **Article Generation:** No `generate_article` method in notebooklm-py (any version)
-- **Python Version:** 3.9.6 blocks upgrade to SDK 0.2.0+ (latest 0.3.2)
-- **Source Import:** `import_sources` EXISTS in SDK 0.1.1, needs Python 3.10+ to test
+**✅ Upgrades Complete:**
+- **Python:** 3.9.6 → 3.11.14 (venv created)
+- **notebooklm-py:** 0.1.1 → 0.3.2 (installed)
+
+**Remaining:**
+- **Article Generation:** No `generate_article` method - use `generate_report()` instead
+- **Source Import:** `import_sources` available in 0.3.2, needs API credentials to test
 
 **Workaround in place:**
 - Research workflow: ✅ Works (found 44 sources)
