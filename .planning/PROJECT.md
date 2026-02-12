@@ -37,15 +37,16 @@ All v1.0 requirements shipped and validated:
 
 ### Active
 
-Next milestone requirements (TBD — define in v1.1 planning):
+**v1.1: Async Task Execution**
 
-**Suggested from v2 deferred:**
-
-- [ ] MCP server integration for AI agent compatibility
-- [ ] Quiz generation from research synthesis
-- [ ] Flashcard generation from key insights
-- [ ] Newsletter-style deep dive format
-- [ ] SEO-optimized article templates
+- [ ] ASYNC-01: `run` command triggers full pipeline and returns task_id immediately
+- [ ] ASYNC-02: `status <task-id>` returns task progress and current stage
+- [ ] ASYNC-03: Pipeline stages: NOTEBOOK_CREATED → RESEARCH_TRIGGERED → RESEARCH_COMPLETED → SYNTHESIS_DONE → ARTICLE_DONE → MEDIA_DONE → COMPLETED
+- [ ] ASYNC-04: User notified when task completes with output location
+- [ ] ASYNC-05: `cancel <task-id>` to cancel pending/running task
+- [ ] NOTIFY-01: Progress updates during long operations
+- [ ] NOTIFY-02: Clear stage indicators in status output
+- [ ] OUT-07: Configurable output directory via `--output-dir`
 
 ### Out of Scope
 
