@@ -1,130 +1,42 @@
 # State: NotebookLM Article Factory
 
-**Last Updated:** 2026-02-12
+**Last Updated:** 2026-02-13
 
 ## Project Reference
+
+See: .planning/PROJECT.md (updated after v1.1 milestone)
 
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Phase** | 4 - Async Pipeline (Needs Fixes) |
+| **Current Focus** | v1.1 shipped - Ready for next milestone |
 | **Mode** | yolo |
 | **Depth** | quick |
-| **Requirements Coverage** | 45/45 (100%) |
-
-## Current Position
-
-**Phase 4: Async Pipeline (Complete)**
-- **Plans:** 5/5 completed (04-scheduler, 04-progress, 04-status, 04-gap-closure, 05-sdk-upgrade)
-- **Goal:** Non-blocking task execution with progress tracking and task IDs
-- **Status:** ✅ All features working, SDK upgraded
-
-## Performance Metrics
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| Phase Completion | 100% | 100% (3/3 plans) |
-| Plans Completed | 3 | 10 |
-| Requirements Mapped | 45/45 | 45/45 (100%) |
-| Coverage Gaps | 0 | 0 |
-| Phase 04-async-pipeline P04-progress | 2 | 2 tasks | 2 files |
-| Phase 04-async-pipeline P04-status | 2 | 3 tasks | 1 files |
-
-## Performance Metrics
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| Phase Completion | 100% | 100% (3/3 plans) |
-| Plans Completed | 3 | 10 |
-| Requirements Mapped | 45/45 | 45/45 (100%) |
-| Coverage Gaps | 0 | 0 |
-
-## Accumulated Context
-
-### Key Decisions
-
-| Decision | Rationale | Status |
-|----------|-----------|--------|
-| CLI-only interface | Simplicity, automation-friendly, no GUI overhead | Confirmed |
-| SQLite state store | Crash recovery, retry management, idempotent operations | Confirmed |
-| Dynamic prompt architecture | Flexibility for content experimentation and A/B testing | Confirmed |
-| Max 3 concurrent topics | Balance throughput with API rate limits | Confirmed |
-| WAL mode for SQLite | Concurrent async access without locking | Confirmed |
-| notebooklm-py SDK | Official SDK for NotebookLM API integration | Confirmed |
-| Rate limiting + circuit breaker | API resilience and key protection | Confirmed |
-| Research orchestration workflow | Async start/poll/run patterns for resilience | Confirmed |
-
-### Technical Notes
-
-- **Tech Stack:** Python + NotebookLMClient SDK only
-- **APIs:** NotebookLM API exclusively
-- **Concurrency:** Max 3 concurrent topics, 2-5 min poll interval
-- **Timeout:** 45 minutes per artifact, max 2 retries per stage
-- **Output Format:** Structured `YYYY-MM-DD/topic-slug/` directories
-
-### Phase Dependencies
-
-```
-Phase 1 (Foundation) → Phase 2 (Research Layer) → Phase 3 (Content Delivery)
-     ↑                    ↑
-No dependencies      Requires Phase 1
-```
-
-## Session Continuity
-
-### Last Session
-- **Timestamp:** 2026-02-12
-- **Stopped At:** Phase 4 Wave 1 complete - scheduler implemented
-- **Resume File:** None
-
-### What's Been Done
-
-1. **Project initialized** - Core value and requirements defined
-2. **Roadmap created** - 4 phases derived from 45 requirements
-3. **Phase structure:**
-   - Phase 1: CLI Foundation + State Management (9 requirements) ✓ Complete
-   - Phase 2: Research Layer + Core Error Handling (8 requirements) ✓ Complete
-   - Phase 3: Content Delivery + Dynamic Prompting (20 requirements) ✓ Complete
-   - Phase 4: Async Pipeline + Task Execution (8 requirements) - In Progress
-4. **Phase 4 progress:**
-   - Plan 04-scheduler - Task scheduler and async pipeline ✓ Complete
-   - Plan 04-progress - Progress tracking (integrated in scheduler)
-   - Plan 04-status - Status commands (integrated in CLI)
-
-### What's Next
-
-**Phase 4 completion:**
-- ✅ Python 3.11.14 activated
-- ✅ notebooklm-py 0.3.2 installed
-- ✅ Implemented `generate_report()` in article.py
-- ✅ Added `--format synthesis|report` CLI option
-- ⏳ Test end-to-end generation
-
-**CLI Commands Available:**
-```bash
-article-factory create --topic "..." --prompt "..."
-article-factory status [--json]
-article-factory run <topic-id> [--prompt "..."] [--output-dir ...]  # Returns task_id immediately
-article-factory status <task-id>  # Check task progress
-article-factory cancel <task-id>  # Cancel running task
-```
-
-### Blockers
-
-**✅ Upgrades Complete:**
-- **Python:** 3.9.6 → 3.11.14 (venv created)
-- **notebooklm-py:** 0.1.1 → 0.3.2 (installed)
-
-**Remaining:**
-- **Article Generation:** No `generate_article` method - use `generate_report()` instead
-- **Source Import:** `import_sources` available in 0.3.2, needs API credentials to test
-
-**Workaround in place:**
-- Research workflow: ✅ Works (found 44 sources)
-- Synthesis generation: ✅ Works (saves discovered sources to file)
-- Article generation: ⚠️ Works via synthesis fallback (935 words, < 2000 min)
-- Infographic/Audio: ⚠️ Not tested (needs API credentials)
 
 ---
 
-*State managed by GSD workflow. Update after phase completion.*
+## v1.1 Milestone Complete
+
+**Shipped:** 2026-02-13
+- 4 phases (1-4), 10 plans, all complete
+- All 45 requirements validated
+- UAT: 11 passed, 0 issues
+
+**Archived:**
+- `.planning/milestones/v1.1-ROADMAP.md`
+- `.planning/milestones/v1.1-REQUIREMENTS.md`
+
+---
+
+## What's Next
+
+**Ready for v2.0:** Extended formats and MCP integration
+
+Start next milestone:
+```bash
+/gsd-new-milestone
+```
+
+---
+
+*State updated after v1.1 milestone completion.*
