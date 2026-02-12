@@ -136,3 +136,8 @@ class CircuitBreaker:
         """Try to close circuit after timeout."""
         await asyncio.sleep(self.recovery_timeout)
         self._state = CircuitState.HALF_OPEN
+
+
+# Global instances for module-level access
+rate_limiter = RateLimiter(max_concurrent=3, min_interval=120)
+circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=300)

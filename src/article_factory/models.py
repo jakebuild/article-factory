@@ -45,6 +45,12 @@ class Topic(Base):
     notebook_id = Column(String, nullable=True)
     artifact_ids = Column(String, nullable=True)  # JSON string of artifact IDs
     
+    # Content generation tracking
+    article_generated = Column(Integer, default=0, nullable=False)  # 0=no, 1=yes
+    infographic_generated = Column(Integer, default=0, nullable=False)  # 0=no, 1=yes
+    audio_generated = Column(Integer, default=0, nullable=False)  # 0=no, 1=yes
+    retry_count_content = Column(Integer, default=0, nullable=False)  # For ERR-03 retry tracking
+    
     # Retry tracking
     retry_count = Column(Integer, default=0, nullable=False)
     
@@ -112,6 +118,23 @@ class Topic(Base):
             current_ids.append(artifact_id)
             self.artifact_ids = json.dumps(current_ids)
     
+    def increment_retry_content(self) -> None:
+        """Increment content retry count for ERR-03."""
+        self.retry_count_content += 1
+    
+    def mark_content_generated(self, content_type: str) -> None:
+        """Mark content type as generated.
+        
+        Args:
+            content_type: One of 'article', 'infographic', 'audio'
+        """
+        if content_type == 'article':
+            self.article_generated = 1
+        elif content_type == 'infographic':
+            self.infographic_generated = 1
+        elif content_type == 'audio':
+            self.audio_generated = 1
+    
     def to_dict(self) -> dict:
         """Convert topic to dictionary for serialization."""
         return {
@@ -122,6 +145,10 @@ class Topic(Base):
             "notebook_id": self.notebook_id,
             "artifact_ids": self.artifact_ids,
             "retry_count": self.retry_count,
+            "retry_count_content": self.retry_count_content,
+            "article_generated": bool(self.article_generated),
+            "infographic_generated": bool(self.infographic_generated),
+            "audio_generated": bool(self.audio_generated),
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
