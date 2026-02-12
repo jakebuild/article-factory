@@ -7,18 +7,18 @@
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Phase** | 4 - Async Pipeline (Complete) |
+| **Current Phase** | 4 - Async Pipeline (Needs Fixes) |
 | **Mode** | yolo |
 | **Depth** | quick |
 | **Requirements Coverage** | 45/45 (100%) |
 
 ## Current Position
 
-**Phase 4: Async Pipeline (Complete)**
+**Phase 4: Async Pipeline (Diagnosed - Needs Fixes)**
 - **Plans:** 3/3 completed (04-scheduler, 04-progress, 04-status)
 - **Goal:** Non-blocking task execution with progress tracking and task IDs
-- **Requirements:** 8 implemented (ASYNC-01, ASYNC-04, ASYNC-05, NOTIFY-01, OUT-07)
-- **Success Criteria:** 5/5 verified
+- **Requirements:** Partial - ASYNC-01 blocked by notebooklm-py version
+- **Success Criteria:** 4/5 pass, 2 skipped, 1 blocked
 
 ## Performance Metrics
 
@@ -110,7 +110,15 @@ article-factory cancel <task-id>  # Cancel running task
 
 ### Blockers
 
-None. Async pipeline implementation in progress.
+**Critical:**
+- ASYNC-01 Article Generation: Requires `artifacts.generate` method from notebooklm-py >= 0.2.0 (current: 0.1.1)
+- Source Import: `research.import_sources` RPC (LBwxtb) not available in current SDK version
+
+**Workaround in place:**
+- Research workflow: ✅ Works (found 44 sources)
+- Synthesis generation: ✅ Works (saves discovered sources to file)
+- Article generation: ❌ Blocked (no generate method)
+- Infographic/Audio: ❌ Blocked (rate_limiter.acquire coroutine issue)
 
 ---
 
