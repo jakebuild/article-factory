@@ -7,7 +7,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-3 (shipped 2026-02-12)
-- 🚧 **v1.1** — Async Task Execution (In Progress)
+- 🚧 **v1.1** — Async Task Execution (Gap Closure)
 - 📋 **v2.0** — Extended Formats (planned)
 
 ---
@@ -35,7 +35,7 @@ Phases 1-3 complete. All 37 requirements implemented.
 - NOTIFY-01/02: Progress notifications
 - OUT-07: Configurable output directory
 
-**Plans:** 3 plans in 2 waves
+**Plans:** 4 plans in 2 waves (3 implementation + 1 gap closure)
 
 **Plan 01:** Task Scheduler & Job Queue
 - Implements task_id generation (UUID)
@@ -54,6 +54,12 @@ Phases 1-3 complete. All 37 requirements implemented.
 - `cancel <task-id>` command
 - Configurable output directory
 - Wave: 2
+
+**Gap Closure Plan 04:** SDK Limitations Documentation
+- Document notebooklm-py SDK v0.1.1 limitations
+- Diagnose media generation rate_limiter issue
+- Update UAT with final gap status
+- Wave: 1
 
 **Success Criteria:**
 
@@ -86,7 +92,7 @@ Phases 1-3 complete. All 37 requirements implemented.
 | 1 | v1.0 | Complete | 2/2 |
 | 2 | v1.0 | Complete | 2/2 |
 | 3 | v1.0 | Complete | 3/3 |
-| 4 | v1.1 | Not Started | TBD |
+| 4 | v1.1 | Gap Closure | 4/4 |
 
 ---
 
