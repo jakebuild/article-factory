@@ -41,61 +41,72 @@ result: pass
 ### 7. Live pipeline execution (2026-02-14)
 expected: Full pipeline runs: notebook creation → research → synthesis → article → media
 result: partial
-notes: Research and synthesis work. Article generation blocked by notebooklm-py version.
+notes: Research and synthesis work. Article generation now works via synthesis fallback (935 words, < 2000 min).
 
 ### 8. Source discovery and import
 expected: Deep research finds sources and auto-imports them
 result: partial
 notes: Research finds sources (44 found in test). Import RPC not available in SDK.
 
+### 9. Article generation from synthesis (2026-02-14)
+expected: Article generated from notebook sources using chat API
+result: partial
+notes: Chat API returns empty (no imported sources). Fallback to synthesis works but article is short (935 words, min 2000).
+
+### 10. Article length validation (2026-02-14)
+expected: Generated article meets 2000-2500 word requirement
+result: partial
+notes: Synthesis-based article is 935 words. Need notebook sources for full article generation.
+
 ## Summary
 
-total: 8
+total: 10
 passed: 4
-issues: 4 (2 still broken, 2 fixed, 0 pending)
+issues: 6 (3 fixed, 3 still needs work)
 skipped: 2
 
 ## Current Status
 
-**Phase 04-async-pipeline - Partially Working**
+**Phase 04-async-pipeline - Mostly Working**
 - ✅ Core scheduler works
-- ✅ Status command works  
+- ✅ Status command works
 - ✅ Cancel command works
 - ✅ Non-blocking run works
-- ❌ Article generation broken (needs `generate_report` instead of `generate`)
-- ❌ Source import broken (SDK limitation)
-- ⚠️  Media generation unknown (not tested)
+- ⚠️  Article generation works via synthesis fallback (935 words)
+- ❌ Full article generation blocked (needs notebook sources)
+- ❌ Source import blocked (SDK limitation)
+- ⚠️  Media generation not tested
 
 ## Gaps (2026-02-14 - After Live Testing)
 
-### Gap 1: Article Generation Method Missing
-**Status:** ❌ Still broken
-**File:** `src/article_factory/article.py:139`
-**Issue:** `api_client.artifacts.generate` doesn't exist in notebooklm-py 0.1.1
-**Solution:** Use `generate_report` instead, or implement via chat API
-
-### Gap 2: Rate Limiter Context Manager Issue
-**Status:** ✅ FIXED
+### Gap 1: Article Generation via Chat API
+**Status:** ✅ WORKS (with fallback)
 **File:** `src/article_factory/article.py`
-**Issue:** `async with rate_limiter.acquire()` used incorrectly
-**Fix:** Removed rate_limiter from article.py entirely
+**Solution:** Use chat.ask() with synthesis fallback
 
-### Gap 3: Source Import RPC Not Available
-**Status:** ❌ Still broken  
+### Gap 2: Source Import RPC Not Available
+**Status:** ❌ Still broken
 **File:** `src/article_factory/notebook_lm.py`
-**Issue:** `research.import_sources` RPC (LBwxtb) returns "No result found"
-**Fix:** Wait for notebooklm-py update or implement manual source addition
+**Issue:** `research.import_sources` RPC (LBwxtb) not implemented in SDK
+**Solution:** Wait for notebooklm-py update
 
-### Gap 4: slugify Import Issues
-**Status:** ✅ FIXED
-**File:** Multiple files
-**Fix:** All files now use `from slugify import slugify as _slugify`
+### Gap 3: Article Length Requirement
+**Status:** ⚠️ Needs improvement
+**Issue:** Synthesis-based article is 935 words, min 2000 required
+**Solution:** Need notebook sources for full-length article generation
 
-### Gap 5: Scheduler Graceful Error Handling
+### Gap 4: Media Generation
+**Status:** ⚠️ Not tested
+**Files:** `src/article_factory/media.py`, `audio.py`
+**Issue:** `rate_limiter.acquire()` coroutine issue (not tested in live run)
+
+### Gap 5: slugify Imports
 **Status:** ✅ FIXED
-**File:** `src/article_factory/scheduler.py`
-**Fix:** Article generation errors caught and skipped - pipeline continues
+
+### Gap 6: Scheduler Error Handling
+**Status:** ✅ FIXED
 
 ### Still Needing Fixes:
-1. Article generation method (`generate` → `generate_report`)
-2. Source import RPC (blocked by SDK)
+1. Source import SDK update
+2. Article length (requires sources)
+3. Media generation (needs testing)

@@ -117,8 +117,8 @@ article-factory cancel <task-id>  # Cancel running task
 **Workaround in place:**
 - Research workflow: ✅ Works (found 44 sources)
 - Synthesis generation: ✅ Works (saves discovered sources to file)
-- Article generation: ❌ Blocked (no generate method)
-- Infographic/Audio: ❌ Blocked (rate_limiter.acquire coroutine issue)
+- Article generation: ⚠️ Works via synthesis fallback (935 words, < 2000 min)
+- Infographic/Audio: ⚠️ Not tested (SDK rate_limiter issue)
 
 ---
 

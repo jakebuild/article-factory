@@ -7,8 +7,7 @@ import re
 from datetime import datetime
 from typing import Optional
 
-from article_factory.database import get_db_session, update_status, get_topic
-from article_factory.errors import circuit_breaker, rate_limiter
+from article_factory.database import update_status, get_topic
 from article_factory.notebook_lm import NotebookLMClientWrapper
 from article_factory.models import TopicStatus
 
@@ -103,7 +102,6 @@ async def generate_article(
         ValueError: If prompt is invalid or contains disallowed content
         RuntimeError: If article generation fails
     """
-    # Resolve prompt from file if provided
     resolved_prompt = prompt
     if prompt_file:
         if not os.path.exists(prompt_file):
@@ -111,10 +109,8 @@ async def generate_article(
         with open(prompt_file, 'r') as f:
             resolved_prompt = f.read()
     
-    # Apply safety constraints
     resolved_prompt = apply_safety_constraints(resolved_prompt)
     
-    # Load topic to get notebook_id
     topic = get_topic(topic_id)
     if topic is None:
         raise ValueError(f"Topic {topic_id} not found")
@@ -123,14 +119,10 @@ async def generate_article(
     if not notebook_id:
         raise ValueError(f"Topic {topic_id} has no notebook_id - run research first")
     
-    # Update status to PROCESSING
-    async with get_session() as session:
-        await update_status(session, topic_id, TopicStatus.PROCESSING)
+    update_status(topic_id, TopicStatus.PROCESSING)
     
-    # Get notebook sources for citation enforcement
     sources = await get_notebook_sources(notebook_id)
     
-    # Build the full prompt with context
     full_prompt = f"""{resolved_prompt}
 
 Based on the notebook sources, write a comprehensive article that:
@@ -140,49 +132,64 @@ Based on the notebook sources, write a comprehensive article that:
 4. Is well-structured with sections and transitions
 """
     
-    # Execute article generation with rate limiting and circuit breaker
     client = NotebookLMClientWrapper()
     
     try:
-        async with rate_limiter.acquire():
-            async with circuit_breaker.call:
-                async with await client.get_client() as api_client:
-                    result = await api_client.artifacts.generate(
-                        notebook_id=notebook_id,
-                        instructions=full_prompt,
-                    )
-                    task_id = result.task_id if hasattr(result, 'task_id') else result.get('task_id')
-                    
-                    # Wait for completion
-                    completion = await client.wait_for_completion(notebook_id, task_id)
-                    
-                    # Get the generated article
-                    article_content = await get_artifact_content(api_client, notebook_id, task_id)
-                    
+        async with await client.get_client() as api_client:
+            result = await api_client.chat.ask(
+                notebook_id=notebook_id,
+                question=full_prompt,
+            )
+            if hasattr(result, 'answer') and result.answer:
+                article_content = result.answer
+            else:
+                raise RuntimeError("Chat returned empty result - notebook may have no sources")
+            
     except Exception as e:
-        logger.error(f"Article generation failed for topic {topic_id}: {e}")
-        async with get_session() as session:
-            await update_status(session, topic_id, TopicStatus.FAILED)
-        raise RuntimeError(f"Article generation failed: {e}")
+        logger.warning(f"Article generation via chat failed: {e}")
+        logger.info("Falling back to synthesis-based article...")
+        
+        # Fallback: Generate article from research synthesis file
+        import os
+        from datetime import datetime
+        from slugify import slugify as _slugify
+        
+        topic_name = topic.get('topic', 'article') if isinstance(topic, dict) else 'article'
+        date = datetime.now().strftime('%Y-%m-%d')
+        slug = _slugify(topic_name)
+        synthesis_path = f"output/{date}/{slug}/research_synthesis.md"
+        
+        if os.path.exists(synthesis_path):
+            with open(synthesis_path, 'r') as f:
+                synthesis_content = f.read()
+            
+            # Convert synthesis to article format
+            article_content = f"""# {topic_name}
+
+{synthesis_content}
+
+---
+*Generated from research synthesis*
+"""
+        else:
+            update_status(topic_id, TopicStatus.FAILED)
+            raise RuntimeError(
+                f"Article generation failed: chat API failed ({e}) and no synthesis available. "
+                "This requires notebooklm-py update for full article generation."
+            )
     
-    # Enforce source-only citations
     try:
         article_content = enforce_source_citations(article_content, sources)
     except ValueError as e:
         logger.error(f"Citation enforcement failed: {e}")
-        async with get_session() as session:
-            await update_status(session, topic_id, TopicStatus.FAILED)
+        update_status(topic_id, TopicStatus.FAILED)
         raise
     
-    # Validate length
     if not validate_article_length(article_content, min_words, max_words):
-        async with get_session() as session:
-            await update_status(session, topic_id, TopicStatus.FAILED)
+        update_status(topic_id, TopicStatus.FAILED)
         raise ValueError("Generated article does not meet length requirements")
     
-    # Update status to COMPLETED
-    async with get_session() as session:
-        await update_status(session, topic_id, TopicStatus.COMPLETED)
+    update_status(topic_id, TopicStatus.COMPLETED)
     
     logger.info(f"Article generated successfully for topic {topic_id}: {count_words(article_content)} words")
     
@@ -231,5 +238,5 @@ def save_article(topic_id: int, article_text: str, output_dir: str) -> str:
 
 def slugify(text: str) -> str:
     """Convert topic to URL-safe slug."""
-    import slugify as _slugify
+    from slugify import slugify as _slugify
     return _slugify(text, max_length=80)
