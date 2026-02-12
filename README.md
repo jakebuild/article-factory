@@ -9,7 +9,7 @@ A **programmable research-backed publishing engine** powered entirely by Noteboo
 3. **Runs deep research** automatically on each topic
 4. **Generates content** using your custom prompts:
    - Research synthesis from discovered sources
-   - Long-form articles (from synthesis)
+   - Long-form articles (2,000-2,500 words)
 5. **Exports everything** to structured directories
 
 ## Installation
@@ -63,53 +63,49 @@ article-factory cancel <task-id>
 ```
 YYYY-MM-DD/topic-slug/
 ├── research_synthesis.md  # Research findings from deep research
-├── article.md            # Generated article (from synthesis)
-└── metadata.json          # Processing metadata
+├── article.md            # Generated article (2,000-2,500 words)
+├── infographic.png      # Generated infographic (optional)
+├── podcast.mp3          # Generated audio briefing (optional)
+└── metadata.json         # Processing metadata
 ```
 
 ## Features
 
-- **Async Pipeline**: Non-blocking execution with task IDs
+- **Async Pipeline**: Non-blocking execution with task IDs and progress tracking
 - **Dynamic Prompting**: Inject prompts inline (`--prompt`) or from files (`--prompt-file`)
 - **Source Citations**: Generated content cites sources from your notebook
 - **Safety Constraints**: Built-in content safety checks
 - **Error Resilience**: Rate limiting, circuit breaker, and automatic retries
 - **Crash Recovery**: Resume from where you left off
 - **JSON Output**: `--json` flag for automation
+- **Report Format**: `--format synthesis|report` for different article generation methods
 
 ## Current Status
 
-### v1.0 MVP - SHIPPED ✅
+### v1.1 Async Pipeline - SHIPPED ✅
 
-All core features working:
-- CLI commands (create, status, retry, cancel)
-- Notebook creation with timestamped slug format
-- Deep research triggering
-- Research synthesis generation
-- Article generation (via synthesis fallback)
-- SQLite state management
+Full async execution with progress tracking:
 
-### v1.1 Async Pipeline - IN PROGRESS 🚧
-
-Async execution with progress tracking:
 - `run` command returns task_id immediately ✅
 - `status <task-id>` shows progress ✅
 - `cancel <task-id>` works ✅
-- Progress notifications ⚠️ (partially)
-- Article generation via synthesis ✅ (935 words)
+- Source discovery and import ✅ (39 sources found, 10 imported)
+- Article generation ✅ (2,356 words via chat API)
+- `--format synthesis|report` option ✅
 
-**Known Limitations:**
-- Source auto-import requires notebooklm-py >= 0.2.0
-- Full article generation needs sources in notebook
-- Media generation (infographic/audio) pending testing
+**Verified:** 11 UAT tests passed, 0 issues
 
-See `.planning/STATE.md` for full roadmap.
+### v2.0 Planning
+
+Extended formats and MCP integration:
+- MCP server integration
+- Quiz/flashcard generation
+- Newsletter/SEO templates
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.11+
 - NotebookLM account
-- `pip install "notebooklm-py[browser]"` for authentication
 - See `pyproject.toml` for full dependencies
 
 ## License
