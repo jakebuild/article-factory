@@ -78,7 +78,7 @@ class NotebookLMClientWrapper:
             status = await client.artifacts.wait_for_completion(
                 notebook_id, task_id, timeout=timeout
             )
-            return {"status": status.status, "url": status.url}
+            return {"status": status.status, "url": status.url, "error": status.error}
     
     async def download_audio(self, notebook_id: str, output_path: str, artifact_id: str = None) -> str:
         """Download audio to file."""
@@ -99,3 +99,86 @@ class NotebookLMClientWrapper:
         async with await self.get_client() as client:
             sources = await client.sources.list(notebook_id)
             return sources
+
+    async def generate_infographic(self, notebook_id: str, instructions: str = None) -> dict:
+        """Trigger infographic generation and wait until it reaches COMPLETED status.
+
+        The CREATE_VIDEO RPC returns None even on success, so we track the artifact
+        via before/after list diff and poll _list_raw directly (ArtifactStatus.COMPLETED=3)
+        rather than using poll_status whose fallback incorrectly maps status=4 to "completed".
+        """
+        import asyncio as _asyncio
+        from notebooklm._artifacts import ArtifactStatus
+
+        # ArtifactTypeCode.INFOGRAPHIC = 7 across all SDK versions
+        INFOGRAPHIC = 7
+
+        async with await self.get_client() as client:
+            # Delete all previously failed infographic artifacts to avoid
+            # hitting NotebookLM rate limits from stale failed attempts
+            raw_before = await client.artifacts._list_raw(notebook_id)
+            failed_ids = [
+                a[0] for a in raw_before
+                if isinstance(a, list) and len(a) > 4
+                and a[2] == INFOGRAPHIC
+                and a[4] == ArtifactStatus.FAILED
+            ]
+            for artifact_id in failed_ids:
+                try:
+                    await client.artifacts.delete(notebook_id, artifact_id)
+                except Exception:
+                    pass
+
+            # Snapshot existing completed infographic IDs
+            completed_before = {
+                a[0] for a in raw_before
+                if isinstance(a, list) and len(a) > 4
+                and a[2] == INFOGRAPHIC
+                and a[4] == ArtifactStatus.COMPLETED
+            }
+
+            # Trigger generation — orientation=LANDSCAPE + detail=STANDARD required for success
+            from notebooklm._artifacts import InfographicOrientation, InfographicDetail
+            await client.artifacts.generate_infographic(
+                notebook_id,
+                instructions=instructions,
+                orientation=InfographicOrientation.LANDSCAPE,
+                detail_level=InfographicDetail.STANDARD,
+            )
+            await _asyncio.sleep(3)
+
+            # Find the new artifact via diff
+            raw_after = await client.artifacts._list_raw(notebook_id)
+            new_arts = [
+                a for a in raw_after
+                if isinstance(a, list) and len(a) > 4
+                and a[2] == INFOGRAPHIC
+                and a[0] not in completed_before
+            ]
+            if not new_arts:
+                raise RuntimeError("Infographic trigger sent but no new artifact appeared")
+
+            new_id = new_arts[0][0]
+
+            # Poll until COMPLETED or FAILED
+            timeout, interval, elapsed = 300, 5, 0
+            while elapsed < timeout:
+                await _asyncio.sleep(interval)
+                elapsed += interval
+                raw = await client.artifacts._list_raw(notebook_id)
+                art = next((a for a in raw if isinstance(a, list) and len(a) > 0 and a[0] == new_id), None)
+                if art is None:
+                    raise RuntimeError(f"Infographic artifact {new_id} disappeared")
+                status_code = art[4] if len(art) > 4 else None
+                if status_code == ArtifactStatus.COMPLETED:
+                    return {"task_id": new_id}
+                if status_code == ArtifactStatus.FAILED:
+                    raise RuntimeError("NotebookLM infographic generation failed (FAILED status)")
+
+            raise RuntimeError(f"Infographic generation timed out after {timeout}s")
+
+    async def download_infographic(self, notebook_id: str, output_path: str) -> str:
+        """Download infographic PNG to file."""
+        async with await self.get_client() as client:
+            path = await client.artifacts.download_infographic(notebook_id, output_path)
+            return path

@@ -22,7 +22,7 @@ def get_output_dir(topic_id: int) -> str:
     topic = get_topic(topic_id)
     if topic is None:
         raise ValueError(f"Topic {topic_id} not found")
-    topic_name = topic.get("topic") or topic.topic if hasattr(topic, "topic") else ""
+    topic_name = topic.get("topic") if isinstance(topic, dict) else topic.topic
     date = topic.get("created_at", "")[:10] if topic.get("created_at") else datetime.now().strftime("%Y-%m-%d")
     slug = slugify(topic_name)
     dir_path = os.path.join("output", f"{date}__{slug}")

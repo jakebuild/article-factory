@@ -369,6 +369,44 @@ def batch_topics(
         raise typer.Exit(code=1)
 
 
+@app.command("graphic")
+def generate_graphic(
+    topic_id: int = typer.Argument(..., help="Topic ID to generate infographic for"),
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """Generate infographic for an existing topic (no research re-run)."""
+    from article_factory.media import generate_infographic
+
+    topic = database.get_topic(topic_id)
+    if topic is None:
+        typer.echo(f"Error: Topic {topic_id} not found", err=True)
+        raise typer.Exit(code=1)
+
+    if not topic.get("notebook_id"):
+        typer.echo(f"Error: Topic {topic_id} has no notebook - run research first", err=True)
+        raise typer.Exit(code=1)
+
+    typer.echo(f"Generating infographic for topic {topic_id}...")
+    try:
+        path = asyncio.run(generate_infographic(topic_id))
+        if json_output:
+            typer.echo(json.dumps({"topic_id": topic_id, "path": path}))
+        else:
+            typer.echo(f"Infographic saved: {path}")
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
+
+
+@app.command("worker", hidden=True)
+def worker_cmd(
+    task_id: str = typer.Argument(..., help="Task ID to execute"),
+) -> None:
+    """Internal: execute pipeline for a task (called by run as a detached subprocess)."""
+    from article_factory.scheduler import _execute_pipeline
+    asyncio.run(_execute_pipeline(task_id))
+
+
 @app.command("login")
 def login_cmd():
     """Log in to NotebookLM via browser.

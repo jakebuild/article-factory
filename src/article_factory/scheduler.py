@@ -172,12 +172,17 @@ def run_pipeline_async(
         task_id (UUID string)
     """
     task_id = create_task(topic_id, output_dir, prompt, prompt_file)
-    
-    # Schedule async execution in a background thread
-    import threading
-    thread = threading.Thread(target=lambda: asyncio.run(_execute_pipeline(task_id)), daemon=True)
-    thread.start()
-    
+
+    # Spawn a detached subprocess so the pipeline survives after the CLI exits
+    import subprocess
+    import sys
+    subprocess.Popen(
+        [sys.executable, "-m", "article_factory.main", "worker", task_id],
+        start_new_session=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
     return task_id
 
 

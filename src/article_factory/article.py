@@ -144,7 +144,7 @@ async def generate_article(
     prompt_file: Optional[str] = None,
     min_words: int = 2000,
     max_words: int = 2500,
-    format: Literal["synthesis", "report"] = "synthesis",
+    format: Literal["synthesis", "report"] = "report",
 ) -> str:
     """Generate article for a topic using NotebookLM API with dynamic prompting.
 

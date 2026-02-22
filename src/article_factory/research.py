@@ -172,17 +172,17 @@ async def run_research(topic_id: int):
 
 
 async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
-    """Generate research synthesis and save to file.
+    """Generate research synthesis content.
 
     Uses the NotebookLM chat API to create a structured summary
     of research sources and key insights.
 
     Args:
         notebook_id: NotebookLM notebook ID
-        topic_slug: URL-safe topic identifier for output path
+        topic_slug: URL-safe topic identifier (unused, kept for API compatibility)
 
     Returns:
-        Path to the generated synthesis file
+        Synthesis content as a string
     """
     client = NotebookLMClientWrapper()
 
@@ -195,34 +195,29 @@ async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
     sources_info = poll_result.get('sources', [])
     summary = poll_result.get('summary', '')
 
-    # Save to output directory
-    output_dir = f"output/{datetime.now().strftime('%Y-%m-%d')}/{topic_slug}"
-    os.makedirs(output_dir, exist_ok=True)
+    lines = []
+    lines.append("# Research Synthesis\n")
+    lines.append(f"Generated: {datetime.now().isoformat()}")
+    lines.append(f"Notebook ID: {notebook_id}")
+    lines.append(f"Sources Imported: {source_count}\n")
+    lines.append("---\n")
 
-    synthesis_path = f"{output_dir}/research_synthesis.md"
-    with open(synthesis_path, "w") as f:
-        f.write("# Research Synthesis\n\n")
-        f.write(f"Generated: {datetime.now().isoformat()}\n")
-        f.write(f"Notebook ID: {notebook_id}\n")
-        f.write(f"Sources Imported: {source_count}\n\n")
-        f.write("---\n\n")
+    lines.append("## Discovered Sources\n")
+    for i, src in enumerate(sources_info, 1):
+        title = src.get('title', 'Untitled')
+        url = src.get('url', '')
+        lines.append(f"{i}. **{title}**")
+        if url:
+            lines.append(f"   URL: {url}")
+        lines.append("")
 
-        f.write("## Discovered Sources\n\n")
-        for i, src in enumerate(sources_info, 1):
-            title = src.get('title', 'Untitled')
-            url = src.get('url', '')
-            f.write(f"{i}. **{title}**\n")
-            if url:
-                f.write(f"   URL: {url}\n")
-            f.write("\n")
+    if sources:
+        lines.append("\n## Imported Sources in Notebook\n")
+        for s in sources:
+            lines.append(f"- {s.id}: {s.title}")
 
-        if sources:
-            f.write("\n## Imported Sources in Notebook\n\n")
-            for s in sources:
-                f.write(f"- {s.id}: {s.title}\n")
+    if summary:
+        lines.append("\n## Research Summary\n")
+        lines.append(summary)
 
-        if summary:
-            f.write("\n## Research Summary\n\n")
-            f.write(summary)
-
-    return synthesis_path
+    return "\n".join(lines)
