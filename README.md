@@ -92,6 +92,7 @@ Full async execution with progress tracking:
 - Source discovery and import ✅ (39 sources found, 10 imported)
 - Article generation ✅ (2,356 words via chat API)
 - `--format synthesis|report` option ✅
+- Media generation fixes ✅ (rate limiter bug resolved)
 
 **Verified:** 11 UAT tests passed, 0 issues
 
@@ -106,6 +107,7 @@ Extended formats and MCP integration:
 
 - Python 3.11+
 - NotebookLM account
+- Run `source .venv/bin/activate` to use the included environment
 - See `pyproject.toml` for full dependencies
 
 ## License

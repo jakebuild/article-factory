@@ -173,48 +173,56 @@ async def run_research(topic_id: int):
 
 async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
     """Generate research synthesis and save to file.
-    
+
     Uses the NotebookLM chat API to create a structured summary
     of research sources and key insights.
-    
+
     Args:
         notebook_id: NotebookLM notebook ID
         topic_slug: URL-safe topic identifier for output path
-        
+
     Returns:
         Path to the generated synthesis file
     """
-    # For now, create a simple synthesis from research metadata
-    # The full chat-based synthesis requires notebooklm-py >= 0.2.0
     client = NotebookLMClientWrapper()
-    
-    # Get research poll result to extract sources info
+
+    # Check if sources are imported
+    sources = await client.list_sources(notebook_id)
+    source_count = len(sources) if sources else 0
+
+    # Get research poll result
     poll_result = await client.poll_research(notebook_id)
-    sources = poll_result.get('sources', [])
+    sources_info = poll_result.get('sources', [])
     summary = poll_result.get('summary', '')
-    
+
     # Save to output directory
     output_dir = f"output/{datetime.now().strftime('%Y-%m-%d')}/{topic_slug}"
     os.makedirs(output_dir, exist_ok=True)
-    
+
     synthesis_path = f"{output_dir}/research_synthesis.md"
     with open(synthesis_path, "w") as f:
         f.write("# Research Synthesis\n\n")
         f.write(f"Generated: {datetime.now().isoformat()}\n")
-        f.write(f"Notebook ID: {notebook_id}\n\n")
+        f.write(f"Notebook ID: {notebook_id}\n")
+        f.write(f"Sources Imported: {source_count}\n\n")
         f.write("---\n\n")
-        
+
         f.write("## Discovered Sources\n\n")
-        for i, src in enumerate(sources, 1):
+        for i, src in enumerate(sources_info, 1):
             title = src.get('title', 'Untitled')
             url = src.get('url', '')
             f.write(f"{i}. **{title}**\n")
             if url:
                 f.write(f"   URL: {url}\n")
             f.write("\n")
-        
+
+        if sources:
+            f.write("\n## Imported Sources in Notebook\n\n")
+            for s in sources:
+                f.write(f"- {s.id}: {s.title}\n")
+
         if summary:
             f.write("\n## Research Summary\n\n")
             f.write(summary)
-    
+
     return synthesis_path

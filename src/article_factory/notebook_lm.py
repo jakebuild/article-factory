@@ -93,3 +93,9 @@ class NotebookLMClientWrapper:
         async with await self.get_client() as client:
             imported = await client.research.import_sources(notebook_id, task_id, sources)
             return imported
+
+    async def list_sources(self, notebook_id: str) -> list:
+        """List all sources in a notebook."""
+        async with await self.get_client() as client:
+            sources = await client.sources.list(notebook_id)
+            return sources

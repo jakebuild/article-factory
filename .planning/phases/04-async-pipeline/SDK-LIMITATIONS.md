@@ -2,6 +2,36 @@
 
 **Current Version:** 0.1.1 (Python 3.9.6 compatible)
 **Latest Available:** 0.3.2 (requires Python 3.10+)
+**Documented:** 2026-02-13
+**Updated:** 2026-02-22
+
+## Media Generation - FIXED
+
+**Issue:** `async with rate_limiter.acquire()` - incorrect async context manager usage
+
+**Status:** ✅ **FIXED** (2026-02-22)
+
+**Root Cause:** `rate_limiter.acquire()` is an async function that returns `True`, not an async context manager. The code was trying to use the coroutine as a context manager.
+
+**Fix Applied:**
+```python
+# Before (broken):
+async with rate_limiter.acquire():
+    ...
+
+# After (fixed):
+await rate_limiter.acquire()
+try:
+    ...
+finally:
+    rate_limiter.release()
+```
+
+**Files Fixed:**
+- `src/article_factory/media.py` (line 80)
+- `src/article_factory/audio.py` (line 85)
+
+---
 
 ## Article Generation
 

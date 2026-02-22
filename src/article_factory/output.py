@@ -27,7 +27,7 @@ def get_output_dir(topic_id: int) -> str:
         topic_id: Topic database ID
         
     Returns:
-        Path to output directory (YYYY-MM-DD/topic-slug/)
+        Path to output directory (output/YYYY-MM-DD/topic-slug/)
     """
     topic = get_topic(topic_id)
     if topic is None:
@@ -36,7 +36,7 @@ def get_output_dir(topic_id: int) -> str:
     topic_name = topic.get("topic") or ""
     date = topic.get("created_at", "")[:10] if topic.get("created_at") else datetime.now().strftime("%Y-%m-%d")
     slug = slugify(topic_name)
-    dir_path = f"{date}__{slug}"
+    dir_path = os.path.join("output", f"{date}__{slug}")
     os.makedirs(dir_path, exist_ok=True)
     return dir_path
 

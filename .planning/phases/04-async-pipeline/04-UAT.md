@@ -3,7 +3,27 @@ status: complete
 phase: 04-async-pipeline
 source: 04-scheduler-SUMMARY.md, 04-progress-SUMMARY.md, 04-status-SUMMARY.md, 04-async-pipeline-04-SUMMARY.md, 04-async-pipeline-05-SUMMARY.md
 started: 2026-02-12T12:00:00Z
-updated: 2026-02-12T23:55:00Z
+updated: 2026-02-22
+---
+
+## Gap Closure (2026-02-22)
+
+### Action Taken
+- Fixed media generation rate_limiter issue in media.py and audio.py
+- Updated SDK-LIMITATIONS.md with media fix documentation
+- Confirmed: No code fix available for SDK limitations
+
+### Resolution
+- Gap 2 (Source Import): SDK limitation - documented in SDK-LIMITATIONS.md
+- Gap 3 (Article Length): SDK limitation - use generate_report() as workaround
+- Gap 4 (Media Generation): ✅ FIXED - rate_limiter.acquire() usage corrected
+
+### Still Needing Fixes:
+1. Source import SDK update - External, cannot fix
+2. Article length (requires sources) - External, use generate_report() workaround
+
+**Note:** All remaining issues are SDK limitations requiring notebooklm-py library updates.
+
 ---
 
 ## Current Test

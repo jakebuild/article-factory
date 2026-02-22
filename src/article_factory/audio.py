@@ -25,7 +25,7 @@ def get_output_dir(topic_id: int) -> str:
     topic_name = topic.get("topic") or topic.topic if hasattr(topic, "topic") else ""
     date = topic.get("created_at", "")[:10] if topic.get("created_at") else datetime.now().strftime("%Y-%m-%d")
     slug = slugify(topic_name)
-    dir_path = f"{date}__{slug}"
+    dir_path = os.path.join("output", f"{date}__{slug}")
     os.makedirs(dir_path, exist_ok=True)
     return dir_path
 
@@ -82,7 +82,8 @@ Research summary:
     output_dir = get_output_dir(topic_id)
     
     try:
-        async with rate_limiter.acquire():
+        await rate_limiter.acquire()
+        try:
             async with circuit_breaker.call:
                 async with await client.get_client() as api_client:
                     # Generate audio via NotebookLM API
@@ -99,6 +100,8 @@ Research summary:
                         await client.download_audio(notebook_id, audio_path, artifact_id)
                     else:
                         raise ValueError("No artifact ID returned from audio generation")
+        finally:
+            rate_limiter.release()
     
     except Exception as e:
         logger.error(f"Audio briefing generation failed for topic {topic_id}: {e}")
