@@ -111,4 +111,4 @@ async def poll_research_status(notebook_id: str) -> dict:
 
 async def wait_for_research_completion(notebook_id: str, task_id: str, timeout: int = 2700) -> dict:
     """Wait for research completion (legacy wrapper, prefer poll_and_import_sources)."""
-    return await poll_and_import_sources(notebook_id, task_id)
+    return await poll_and_import_sources(notebook_id, task_id, timeout=timeout)

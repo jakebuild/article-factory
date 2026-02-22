@@ -80,6 +80,13 @@ YYYY-MM-DD/topic-slug/
 - **JSON Output**: `--json` flag for automation
 - **Report Format**: `--format synthesis|report` for different article generation methods
 
+## Pipeline Guarantees
+
+- `RESEARCH_COMPLETED` is reported only after research polling and source import complete
+- `COMPLETED` requires required outputs to exist before final status update
+- For `run` jobs with a prompt, required outputs are `article.md` and `infographic.png`
+- If required outputs are missing (for example infographic generation fails), task status is `FAILED` with an explicit error
+
 ## Current Status
 
 ### v1.1 Async Pipeline - SHIPPED ✅
@@ -102,6 +109,12 @@ Extended formats and MCP integration:
 - MCP server integration
 - Quiz/flashcard generation
 - Newsletter/SEO templates
+
+## Troubleshooting
+
+- **Task appears stuck at 50% (`RESEARCH_COMPLETED`)**: wait for source import to finish; this stage can take longer than research trigger.
+- **Task completes without files you expect**: check `article-factory status <task-id> --json` and verify `output_dir`; required artifact failures now surface as `FAILED`.
+- **Infographic failures**: run `article-factory graphic <topic-id>` to retry and inspect the returned error.
 
 ## Requirements
 

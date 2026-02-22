@@ -151,6 +151,18 @@ def cancel_task(task_id: str) -> bool:
         return False
 
 
+def set_task_output_dir(task_id: str, output_dir: str) -> bool:
+    """Persist output directory for a task."""
+    with get_db_session() as session:
+        task = session.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            return False
+        task.output_dir = output_dir
+        task.updated_at = datetime.utcnow()
+        session.flush()
+        return True
+
+
 def run_pipeline_async(
     topic_id: int,
     prompt: str = None,
@@ -241,11 +253,12 @@ async def _execute_pipeline(task_id: str) -> None:
         from article_factory.notebooks import trigger_deep_research
         task_id_research = await trigger_deep_research(topic_id, notebook_id, topic_prompt or "")
         
-        # Stage: RESEARCH_COMPLETED
-        update_task_progress(task_id, TaskStatus.RESEARCH_COMPLETED, 50, "Research in progress")
-        
         from article_factory.notebooks import wait_for_research_completion
-        await wait_for_research_completion(notebook_id, task_id_research)
+        research_result = await wait_for_research_completion(notebook_id, task_id_research)
+
+        # Stage: RESEARCH_COMPLETED
+        imported_count = research_result.get("sources_imported", 0) if isinstance(research_result, dict) else 0
+        update_task_progress(task_id, TaskStatus.RESEARCH_COMPLETED, 50, f"Research completed, imported {imported_count} sources")
         
         # Stage: SYNTHESIS_DONE
         update_task_progress(task_id, TaskStatus.SYNTHESIS_DONE, 60, "Generating synthesis")
@@ -272,28 +285,42 @@ async def _execute_pipeline(task_id: str) -> None:
         
         # Stage: MEDIA_DONE
         update_task_progress(task_id, TaskStatus.MEDIA_DONE, 90, "Generating media")
+
+        infographic_path = None
+        audio_path = None
         
         # Generate infographic
         try:
             from article_factory.media import generate_infographic
-            await generate_infographic(topic_id)
+            infographic_path = await generate_infographic(topic_id)
         except Exception as e:
-            print(f"Warning: Infographic generation failed: {e}")
+            raise RuntimeError(f"Infographic generation failed: {e}") from e
         
         # Generate audio
         try:
             from article_factory.audio import generate_audio_briefing
-            await generate_audio_briefing(topic_id)
+            audio_path = await generate_audio_briefing(topic_id)
         except Exception as e:
             print(f"Warning: Audio generation failed: {e}")
-        
-        # Export all artifacts
-        update_task_progress(task_id, TaskStatus.COMPLETED, 100, "Exporting artifacts")
-        
+
+        # Export all artifacts and verify required outputs
         from article_factory.output import export_all_artifacts
-        export_all_artifacts(topic_id, article_text, synthesis)
-        
-        notify_complete(task_id, output_dir or get_default_output_dir(topic_id))
+        exported = export_all_artifacts(topic_id, article_text, synthesis, infographic_path, audio_path)
+        output_path = exported.get("output_dir") or output_dir or get_default_output_dir(topic_id)
+        set_task_output_dir(task_id, output_path)
+
+        missing = []
+        if task_prompt or task_prompt_file:
+            if not exported.get("article"):
+                missing.append("article.md")
+        if not exported.get("infographic"):
+            missing.append("infographic.png")
+
+        if missing:
+            raise RuntimeError(f"Missing required artifacts: {', '.join(missing)}")
+
+        update_task_progress(task_id, TaskStatus.COMPLETED, 100, "Export complete")
+        notify_complete(task_id, output_path)
         
     except asyncio.CancelledError:
         update_task_progress(task_id, TaskStatus.CANCELLED, 0, "Task cancelled")
