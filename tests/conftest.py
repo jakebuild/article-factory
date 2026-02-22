@@ -78,4 +78,30 @@ def mock_nlm_client():
     client.list_sources = AsyncMock(return_value=[{"id": "src-1", "title": "Source 1"}])
     client.generate_infographic = AsyncMock(return_value={"task_id": "infographic-task-id"})
     client.download_infographic = AsyncMock(return_value="/tmp/infographic.png")
+
+    client.artifacts.generate_report = AsyncMock(return_value=MagicMock(id="artifact-123"))
+    client.artifacts.wait_for_completion = AsyncMock(return_value=MagicMock(artifact_id="artifact-456"))
+    client.artifacts.export_report = AsyncMock(return_value="# Article\n\nContent...")
+    client.notebooks.get = AsyncMock(return_value=MagicMock(sources=[]))
+    client.chat.ask = AsyncMock(return_value=MagicMock(answer="Generated article content"))
     return client
+
+
+@pytest.fixture(autouse=True)
+def enforce_mocked_nlm_client(monkeypatch, mock_nlm_client):
+    """Route all NotebookLM client construction through shared mock fixture."""
+    mock_client_ctx = AsyncMock()
+    mock_client_ctx.__aenter__.return_value = mock_nlm_client
+    mock_client_ctx.__aexit__.return_value = False
+
+    monkeypatch.setattr(
+        NotebookLMClientWrapper,
+        "get_client",
+        AsyncMock(return_value=mock_client_ctx),
+    )
+
+
+@pytest.fixture(autouse=True)
+def enforce_in_memory_db_isolation(db_session):
+    """Ensure each test runs with fixture-provided in-memory DB wiring."""
+    yield db_session
