@@ -1,24 +1,33 @@
 # State: NotebookLM Article Factory
 
-**Last Updated:** 2026-02-13
+**Last Updated:** 2026-02-22
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated after v1.1 milestone)
+See: .planning/PROJECT.md (updated after v2.0 milestone started)
 
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Focus** | v1.1 shipped - Ready for next milestone |
+| **Current Focus** | v2.0: Test Coverage — defining requirements |
 | **Mode** | yolo |
 | **Depth** | quick |
+
+---
+
+## Current Position
+
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-22 — Milestone v2.0 started
 
 ---
 
 ## v1.1 Milestone Complete
 
 **Shipped:** 2026-02-13
-- 4 phases (1-4), 10 plans, all complete
+- 4 phases (1-4), 12 plans, all complete
 - All 45 requirements validated
 - UAT: 11 passed, 0 issues
 
@@ -28,15 +37,4 @@ See: .planning/PROJECT.md (updated after v1.1 milestone)
 
 ---
 
-## What's Next
-
-**Ready for v2.0:** Extended formats and MCP integration
-
-Start next milestone:
-```bash
-/gsd-new-milestone
-```
-
----
-
-*State updated after v1.1 milestone completion.*
+*State updated after v2.0 milestone started.*

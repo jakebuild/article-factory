@@ -37,16 +37,38 @@ All v1.0 requirements shipped and validated:
 
 ### Active
 
-**v1.1: Async Task Execution**
+**v2.0: Test Coverage**
 
-- [ ] ASYNC-01: `run` command triggers full pipeline and returns task_id immediately
-- [ ] ASYNC-02: `status <task-id>` returns task progress and current stage
-- [ ] ASYNC-03: Pipeline stages: NOTEBOOK_CREATED → RESEARCH_TRIGGERED → RESEARCH_COMPLETED → SYNTHESIS_DONE → ARTICLE_DONE → MEDIA_DONE → COMPLETED
-- [ ] ASYNC-04: User notified when task completes with output location
-- [ ] ASYNC-05: `cancel <task-id>` to cancel pending/running task
-- [ ] NOTIFY-01: Progress updates during long operations
-- [ ] NOTIFY-02: Clear stage indicators in status output
-- [ ] OUT-07: Configurable output directory via `--output-dir`
+- [ ] INFRA-01: pytest with asyncio support configured and runnable
+- [ ] INFRA-02: NotebookLM SDK fully mocked (no real API calls in tests)
+- [ ] INFRA-03: Test database fixtures (in-memory SQLite, seeded topics)
+- [ ] INFRA-04: Coverage reporting configured (pytest-cov, target ≥70%)
+- [ ] DB-01: Topic CRUD and retrieval tested
+- [ ] DB-02: Topic status transitions tested
+- [ ] DB-03: get_topic returns None for unknown ID
+- [ ] DB-04: Async DB sessions work in test context
+- [ ] PIPE-01: run_pipeline_async creates task and spawns subprocess
+- [ ] PIPE-02: _execute_pipeline processes stages in correct order
+- [ ] PIPE-03: Pipeline marks topic FAILED when a stage raises
+- [ ] PIPE-04: Retry logic increments count and re-queues up to max retries
+- [ ] RES-01: run_research starts, polls, and imports sources
+- [ ] RES-02: Research polling raises error on timeout
+- [ ] RES-03: generate_synthesis returns content string (not file path)
+- [ ] RES-04: generate_synthesis content includes sources and summary
+- [ ] CONTENT-01: apply_safety_constraints raises ValueError for disallowed patterns
+- [ ] CONTENT-02: enforce_source_citations raises ValueError for unknown citations
+- [ ] CONTENT-03: validate_article_length returns False outside word range
+- [ ] CONTENT-04: generate_article uses report format by default
+- [ ] CONTENT-05: get_output_dir resolves topic_name correctly for dict and object
+- [ ] CONTENT-06: generate_infographic returns existing path without re-generating
+- [ ] ERR-01: rate_limiter blocks beyond concurrent limit
+- [ ] ERR-02: circuit_breaker opens after threshold failures
+- [ ] ERR-03: circuit_breaker resets after cooldown
+- [ ] NLM-01: generate_infographic deletes FAILED artifacts before triggering
+- [ ] NLM-02: generate_infographic detects new artifact via before/after diff
+- [ ] NLM-03: generate_infographic polls until ArtifactStatus.COMPLETED
+- [ ] NLM-04: generate_infographic raises RuntimeError on ArtifactStatus.FAILED
+- [ ] NLM-05: generate_infographic raises RuntimeError on timeout
 
 ### Out of Scope
 
@@ -58,14 +80,27 @@ Confirmed still out of scope:
 - Real-time collaboration features
 - Multi-user accounts
 
-## Current State (v1.0 SHIPPED)
+## Current Milestone: v2.0 Test Coverage
 
-**Shipped:** 2026-02-12
+**Goal:** Retroactively add a pytest test suite with mocked NotebookLM API, covering all critical business logic at ≥70% coverage — so bugs are caught in tests before live runs.
+
+**Target areas:**
+- Test infrastructure (pytest-asyncio, SDK mocks, DB fixtures, coverage)
+- Database operations (CRUD, status transitions)
+- Pipeline/scheduler (subprocess spawning, stage execution, retry logic)
+- Research module (research triggering, synthesis content)
+- Content generation (article safety, citations, media idempotency, output paths)
+- Errors module (rate limiter, circuit breaker)
+- NotebookLM wrapper (infographic polling, artifact diff, status detection)
+
+## Current State (v1.1 SHIPPED)
+
+**v1.0 Shipped:** 2026-02-12 | **v1.1 Shipped:** 2026-02-13
 **Tech Stack:** Python + NotebookLMClient SDK
-**LOC:** ~2,029 Python
-**Phases:** 3 complete
-**Plans:** 7 executed
-**Requirements:** 37/37 implemented
+**LOC:** ~2,800 Python (after v1.1)
+**Phases:** 4 complete (phases 1-4)
+**Plans:** 12 executed
+**Requirements:** 45/45 implemented
 
 ### CLI Commands
 
@@ -116,4 +151,4 @@ The system uses the NotebookLMClient Python SDK exclusively. All interactions fl
 
 ---
 
-*Last updated: 2026-02-12 after v1.0 milestone completion*
+*Last updated: 2026-02-22 after v2.0 milestone started*
