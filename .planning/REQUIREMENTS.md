@@ -1,80 +1,138 @@
-# Requirements: NotebookLM Article Factory v1.1
+# Requirements: NotebookLM Article Factory
 
-**Defined:** 2026-02-12
+**Defined:** 2026-02-22
+**Milestone:** v2.0 Test Coverage
 **Core Value:** A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime.
 
-## v1.1 Requirements
+## v2.0 Requirements
 
-### Async Task Execution
+Retroactive test coverage for all critical business logic. All tests use mocked NotebookLM SDK — no real API calls. Target: ≥70% code coverage.
 
-- [ ] **ASYNC-01**: `run` command triggers full pipeline and returns task_id immediately (non-blocking)
-- [ ] **ASYNC-02**: `status <task-id>` returns task progress and current stage
-- [ ] **ASYNC-03**: Pipeline stages: NOTEBOOK_CREATED → RESEARCH_TRIGGERED → RESEARCH_COMPLETED → SYNTHESIS_DONE → ARTICLE_DONE → MEDIA_DONE → COMPLETED
-- [ ] **ASYNC-04**: User notified when task completes (stdout/stdout) with output location
-- [ ] **ASYNC-05**: `cancel <task-id>` to cancel pending/running task
+### Test Infrastructure
 
-### Progress Notifications
+- [ ] **INFRA-01**: Developer can run `pytest` and all tests pass without NotebookLM credentials
+- [ ] **INFRA-02**: NotebookLM SDK is fully mockable via fixtures (NotebookLMClientWrapper, artifacts, research, chat APIs)
+- [ ] **INFRA-03**: Test database fixture provides isolated in-memory SQLite with seeded topics per test
+- [ ] **INFRA-04**: Coverage report generated on `pytest --cov` showing ≥70% overall coverage
 
-- [ ] **NOTIFY-01**: Progress updates during long operations (research polling, article generation)
-- [ ] **NOTIFY-02**: Clear stage indicators in status output
+### Database
 
-### Output Structure
+- [ ] **DB-01**: Topic can be created and retrieved by ID via get_topic
+- [ ] **DB-02**: Topic status transitions (NEW → PROCESSING → COMPLETED / FAILED) are persisted correctly
+- [ ] **DB-03**: get_topic returns None for an unknown topic ID
+- [ ] **DB-04**: Async DB session operations complete without locking errors under concurrent access
 
-- [ ] **OUT-07**: Output directory configurable via `--output-dir` flag
+### Pipeline / Scheduler
 
-## v1 Requirements (from v1.0 - COMPLETED)
+- [ ] **PIPE-01**: run_pipeline_async creates a task record and spawns a detached subprocess
+- [ ] **PIPE-02**: _execute_pipeline processes pipeline stages in correct order (NOTEBOOK_CREATED → … → COMPLETED)
+- [ ] **PIPE-03**: Pipeline marks topic as FAILED and records error when any stage raises an exception
+- [ ] **PIPE-04**: Retry logic increments retry count and re-queues topic up to max retry limit
+
+### Research
+
+- [ ] **RES-01**: run_research starts deep research, polls until complete, and imports discovered sources into notebook
+- [ ] **RES-02**: Research polling raises a timeout error when max duration is exceeded without completion
+- [ ] **RES-03**: generate_synthesis returns a content string, not a file path
+- [ ] **RES-04**: generate_synthesis content includes discovered source list and research summary section
+
+### Content Generation
+
+- [ ] **CONTENT-01**: apply_safety_constraints raises ValueError when prompt matches a disallowed pattern
+- [ ] **CONTENT-02**: enforce_source_citations raises ValueError when article cites sources not present in notebook
+- [ ] **CONTENT-03**: validate_article_length returns False for articles below min or above max word count
+- [ ] **CONTENT-04**: generate_article defaults to report format (not synthesis/chat)
+- [ ] **CONTENT-05**: get_output_dir resolves topic_name correctly for both dict topics (from DB) and ORM object topics
+- [ ] **CONTENT-06**: generate_infographic returns existing file path immediately without triggering re-generation
+
+### Errors
+
+- [ ] **ERR-01**: rate_limiter blocks acquisition beyond the configured concurrent limit
+- [ ] **ERR-02**: circuit_breaker opens after reaching the failure threshold and rejects subsequent calls
+- [ ] **ERR-03**: circuit_breaker resets to closed state after the cooldown period elapses
+
+### NotebookLM Wrapper
+
+- [ ] **NLM-01**: generate_infographic deletes all FAILED infographic artifacts before triggering new generation
+- [ ] **NLM-02**: generate_infographic identifies the newly created artifact via before/after artifact list diff
+- [ ] **NLM-03**: generate_infographic polls _list_raw until artifact reaches ArtifactStatus.COMPLETED and returns task_id
+- [ ] **NLM-04**: generate_infographic raises RuntimeError when artifact reaches ArtifactStatus.FAILED
+- [ ] **NLM-05**: generate_infographic raises RuntimeError when polling exceeds the timeout duration
+
+## Previous Requirements (v1.0 + v1.1 — COMPLETED)
 
 All v1.0 requirements archived at `.planning/milestones/v1.0-REQUIREMENTS.md`
+All v1.1 requirements archived at `.planning/milestones/v1.1-REQUIREMENTS.md`
 
-## v2 Requirements (Deferred)
+## Future Requirements (Deferred to v3.0)
 
-### Advanced Features
+### Extended Formats
 
 - **MCP-01**: MCP server integration for AI agent compatibility
 - **MCP-02**: MCP protocol support for autonomous agent workflows
-- **VID-01**: Video generation from notebook context
 - **QUIZ-01**: Quiz generation from research synthesis
 - **FLASH-01**: Flashcard generation from key insights
-
-### Content Formats
-
 - **NEWS-01**: Newsletter-style deep dive format
 - **SEO-01**: SEO-optimized article templates
-- **COMP-01**: Competitive analysis report format
-- **CONT-01**: Contrarian thought leadership format
 
-### Orchestration
+### CLI Tests (deferred from v2.0)
 
-- **BATCH-01**: Advanced batch scheduling with priority queues
-- **PARA-01**: Configurable concurrency limits per domain
-- **CACHE-01**: Content caching for repeated topics
-- **DEDUP-01**: Duplicate topic detection
+- **CLI-01**: `run` command returns task_id immediately
+- **CLI-02**: `status` command displays current pipeline stage
+- **CLI-03**: `graphic` command generates and saves infographic
+- **CLI-04**: `article` command generates and saves article
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| External API integrations | Beyond NotebookLM scope |
-| Web crawling | NotebookLM handles source discovery internally |
-| Hard-coded templates | Dynamic prompt architecture enables flexibility |
-| Real-time collaboration | CLI automation focus |
-| Multi-user accounts | Single-user focus |
-| Built-in web UI | CLI-first design philosophy |
+| Live integration tests (real API) | Too slow and costly for CI; mocked tests sufficient |
+| CLI command tests | Thin glue layer; business logic tested via unit tests |
+| Performance/load tests | Not relevant to current quality goals |
+| End-to-end pipeline tests against real NotebookLM | Covered by manual UAT |
 
 ## Traceability
 
+*(Populated during roadmap creation)*
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ASYNC-01 | TBD | Planned |
-| ASYNC-02 | TBD | Planned |
-| ASYNC-03 | TBD | Planned |
-| ASYNC-04 | TBD | Planned |
-| ASYNC-05 | TBD | Planned |
-| NOTIFY-01 | TBD | Planned |
-| NOTIFY-02 | TBD | Planned |
-| OUT-07 | TBD | Planned |
+| INFRA-01 | — | Pending |
+| INFRA-02 | — | Pending |
+| INFRA-03 | — | Pending |
+| INFRA-04 | — | Pending |
+| DB-01 | — | Pending |
+| DB-02 | — | Pending |
+| DB-03 | — | Pending |
+| DB-04 | — | Pending |
+| PIPE-01 | — | Pending |
+| PIPE-02 | — | Pending |
+| PIPE-03 | — | Pending |
+| PIPE-04 | — | Pending |
+| RES-01 | — | Pending |
+| RES-02 | — | Pending |
+| RES-03 | — | Pending |
+| RES-04 | — | Pending |
+| CONTENT-01 | — | Pending |
+| CONTENT-02 | — | Pending |
+| CONTENT-03 | — | Pending |
+| CONTENT-04 | — | Pending |
+| CONTENT-05 | — | Pending |
+| CONTENT-06 | — | Pending |
+| ERR-01 | — | Pending |
+| ERR-02 | — | Pending |
+| ERR-03 | — | Pending |
+| NLM-01 | — | Pending |
+| NLM-02 | — | Pending |
+| NLM-03 | — | Pending |
+| NLM-04 | — | Pending |
+| NLM-05 | — | Pending |
+
+**Coverage:**
+- v2.0 requirements: 30 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 30 ⚠️
 
 ---
-
-*Requirements defined: 2026-02-12*
-*Last updated: 2026-02-12 for v1.1*
+*Requirements defined: 2026-02-22*
+*Last updated: 2026-02-22 after initial definition*
