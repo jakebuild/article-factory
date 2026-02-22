@@ -55,7 +55,10 @@ def db_session(monkeypatch):
 @pytest.fixture
 def mock_nlm_client():
     """Return AsyncMock-backed NotebookLM client wrapper for tests."""
-    client = MagicMock(spec=NotebookLMClientWrapper)
+    client = MagicMock()
+    client.artifacts = MagicMock()
+    client.notebooks = MagicMock()
+    client.chat = MagicMock()
     client.create_notebook = AsyncMock(return_value="notebook-test-id")
     client.get_notebook = AsyncMock(return_value={"id": "notebook-test-id", "title": "Test"})
     client.start_research = AsyncMock(return_value={"task_id": "research-task-id"})
