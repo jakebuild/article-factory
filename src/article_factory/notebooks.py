@@ -33,19 +33,32 @@ async def trigger_deep_research(topic_id: int, notebook_id: str, query: str) -> 
     return result["task_id"]
 
 
-async def poll_and_import_sources(notebook_id: str, task_id: str) -> dict:
+async def poll_and_import_sources(notebook_id: str, task_id: str, timeout: int = 600) -> dict:
     """Poll research status and import all discovered sources.
     
     Args:
         notebook_id: The notebook ID
         task_id: The research task ID
+        timeout: Maximum seconds to wait (default: 10 min)
         
     Returns:
         Dict with status, sources imported count, and any summary
     """
+    import time
     client = NotebookLMClientWrapper()
+    start_time = time.time()
     
     while True:
+        if time.time() - start_time > timeout:
+            print(f"Warning: Research poll timed out after {timeout}s")
+            return {
+                "status": "timeout",
+                "sources_imported": 0,
+                "summary": "",
+                "sources_found": 0,
+                "note": "Research timed out"
+            }
+        
         result = await client.poll_research(notebook_id)
         
         if result.get("status") == "completed":

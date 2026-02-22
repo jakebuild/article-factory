@@ -52,7 +52,14 @@ def extract_sources_from_article(article: str) -> list:
 
 def enforce_source_citations(article: str, available_sources: list) -> str:
     """Verify article only cites sources from notebook."""
+    if not available_sources:
+        logger.warning("No sources in notebook - skipping citation enforcement")
+        return article
+    
     cited_sources = extract_sources_from_article(article)
+    if not cited_sources:
+        return article
+    
     available_source_ids = [s.get("id") or s.get("url") for s in available_sources]
     invalid_sources = [s for s in cited_sources if s not in available_source_ids]
     if invalid_sources:
