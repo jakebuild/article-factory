@@ -71,3 +71,11 @@ def test_task_to_dict_serializes_expected_fields():
     assert data["progress_percent"] == 25
     assert data["output_dir"] == "output/2026-02-22/topic"
     assert data["prompt"] == "write prompt"
+
+
+def test_seeded_topics_available_via_db_session(db_session):
+    topics = db_session.query(Topic).all()
+    topic_names = {topic.topic for topic in topics}
+
+    assert len(topics) >= 1
+    assert {"Python Async", "AI Safety"}.issubset(topic_names)
