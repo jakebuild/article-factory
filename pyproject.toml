@@ -13,6 +13,24 @@ pydantic = ">=2.0.0"
 notebooklm-py = ">=0.3.2"
 python-slugify = ">=8.0.0"
 
+[tool.poetry.dev-dependencies]
+pytest = ">=9.0"
+pytest-asyncio = ">=1.0"
+pytest-cov = ">=6.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--tb=short"
+
+[tool.coverage.run]
+source = ["src/article_factory"]
+omit = ["src/article_factory/cli.py", "src/article_factory/main.py"]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+
 [tool.poetry.scripts]
 article-factory = "article_factory.main:app"
 
