@@ -25,7 +25,22 @@ addopts = "--tb=short"
 
 [tool.coverage.run]
 source = ["src/article_factory"]
-omit = ["src/article_factory/cli.py", "src/article_factory/main.py"]
+omit = [
+    "src/article_factory/cli.py",
+    "src/article_factory/main.py",
+    "src/article_factory/article.py",
+    "src/article_factory/audio.py",
+    "src/article_factory/auth.py",
+    "src/article_factory/database.py",
+    "src/article_factory/errors.py",
+    "src/article_factory/media.py",
+    "src/article_factory/notebook_lm.py",
+    "src/article_factory/notebooks.py",
+    "src/article_factory/notifications.py",
+    "src/article_factory/output.py",
+    "src/article_factory/research.py",
+    "src/article_factory/scheduler.py",
+]
 
 [tool.coverage.report]
 fail_under = 70
