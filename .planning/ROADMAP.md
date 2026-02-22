@@ -48,10 +48,10 @@
   2. NotebookLM SDK (client, artifacts, research, chat APIs) is fully replaceable via a fixture — no real HTTP calls are made
   3. Each test gets an isolated in-memory SQLite database pre-seeded with topic rows
   4. `pytest --cov` produces a coverage report showing overall coverage ≥70%
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 05-01: pytest-asyncio config, conftest structure, SDK mock fixtures, DB fixture, coverage setup
+- [ ] 05-01-PLAN.md — pytest config, in-memory DB fixture, SDK mock fixture, coverage validation
 
 ### Phase 6: Database + Errors Tests
 **Goal**: Database CRUD, status transitions, and resilience primitives (rate limiter, circuit breaker) are verified in isolation
