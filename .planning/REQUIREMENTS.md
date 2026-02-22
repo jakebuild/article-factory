@@ -93,46 +93,44 @@ All v1.1 requirements archived at `.planning/milestones/v1.1-REQUIREMENTS.md`
 
 ## Traceability
 
-*(Populated during roadmap creation)*
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| DB-01 | — | Pending |
-| DB-02 | — | Pending |
-| DB-03 | — | Pending |
-| DB-04 | — | Pending |
-| PIPE-01 | — | Pending |
-| PIPE-02 | — | Pending |
-| PIPE-03 | — | Pending |
-| PIPE-04 | — | Pending |
-| RES-01 | — | Pending |
-| RES-02 | — | Pending |
-| RES-03 | — | Pending |
-| RES-04 | — | Pending |
-| CONTENT-01 | — | Pending |
-| CONTENT-02 | — | Pending |
-| CONTENT-03 | — | Pending |
-| CONTENT-04 | — | Pending |
-| CONTENT-05 | — | Pending |
-| CONTENT-06 | — | Pending |
-| ERR-01 | — | Pending |
-| ERR-02 | — | Pending |
-| ERR-03 | — | Pending |
-| NLM-01 | — | Pending |
-| NLM-02 | — | Pending |
-| NLM-03 | — | Pending |
-| NLM-04 | — | Pending |
-| NLM-05 | — | Pending |
+| INFRA-01 | Phase 5 | Pending |
+| INFRA-02 | Phase 5 | Pending |
+| INFRA-03 | Phase 5 | Pending |
+| INFRA-04 | Phase 5 | Pending |
+| DB-01 | Phase 6 | Pending |
+| DB-02 | Phase 6 | Pending |
+| DB-03 | Phase 6 | Pending |
+| DB-04 | Phase 6 | Pending |
+| ERR-01 | Phase 6 | Pending |
+| ERR-02 | Phase 6 | Pending |
+| ERR-03 | Phase 6 | Pending |
+| PIPE-01 | Phase 7 | Pending |
+| PIPE-02 | Phase 7 | Pending |
+| PIPE-03 | Phase 7 | Pending |
+| PIPE-04 | Phase 7 | Pending |
+| RES-01 | Phase 7 | Pending |
+| RES-02 | Phase 7 | Pending |
+| RES-03 | Phase 7 | Pending |
+| RES-04 | Phase 7 | Pending |
+| CONTENT-01 | Phase 8 | Pending |
+| CONTENT-02 | Phase 8 | Pending |
+| CONTENT-03 | Phase 8 | Pending |
+| CONTENT-04 | Phase 8 | Pending |
+| CONTENT-05 | Phase 8 | Pending |
+| CONTENT-06 | Phase 8 | Pending |
+| NLM-01 | Phase 8 | Pending |
+| NLM-02 | Phase 8 | Pending |
+| NLM-03 | Phase 8 | Pending |
+| NLM-04 | Phase 8 | Pending |
+| NLM-05 | Phase 8 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 30 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 30 ⚠️
+- Mapped to phases: 30
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after initial definition*
+*Last updated: 2026-02-22 — traceability populated during roadmap creation*
