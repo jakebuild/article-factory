@@ -8,3 +8,7 @@ dist/
 build/
 .eggs/
 .venv/
+output/
+.coverage
+.DS_Store
+file:pytest-*

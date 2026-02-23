@@ -8,7 +8,7 @@
 
 - ✅ **v1.0 MVP** — Phases 1-3 (shipped 2026-02-12)
 - ✅ **v1.1 Async Task Execution** — Phases 1-4 (shipped 2026-02-13)
-- 🚧 **v2.0 Test Coverage** — Phases 5-8 (in progress)
+- ✅ **v2.0 Test Coverage** — Phases 5-8 (shipped 2026-02-23)
 
 ---
 
@@ -24,7 +24,7 @@
 
 ---
 
-## 🚧 v2.0: Test Coverage (In Progress)
+## ✅ v2.0: Test Coverage (SHIPPED 2026-02-23)
 
 **Milestone Goal:** Retroactive pytest suite with mocked NotebookLM SDK covering all critical business logic at ≥70% code coverage — so bugs are caught in tests before live runs.
 
@@ -32,7 +32,7 @@
 
 - [x] **Phase 5: Test Infrastructure** - pytest-asyncio setup, SDK mocks, DB fixtures, coverage config
 - [x] **Phase 6: Database + Errors Tests** - Core state layer CRUD, status transitions, and resilience primitives
-- [ ] **Phase 7: Pipeline + Research Tests** - Async pipeline execution, stage ordering, retry logic, research orchestration
+- [x] **Phase 7: Pipeline + Research Tests** - Async pipeline execution, stage ordering, retry logic, research orchestration
 - [x] **Phase 8: Content + Wrapper Tests** - Article generation logic, safety constraints, media idempotency, NLM infographic wrapper
 
 ---
@@ -86,8 +86,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Pipeline scheduler tests for detached spawn, stage ordering, failure handling, and retry logic (PIPE-01..PIPE-04)
-- [ ] 07-02-PLAN.md — Research orchestration and synthesis tests for start/poll/import, timeout, and output content (RES-01..RES-04)
+- [x] 07-01-PLAN.md — Pipeline scheduler tests for detached spawn, stage ordering, failure handling, and retry logic (PIPE-01..PIPE-04)
+- [x] 07-02-PLAN.md — Research orchestration and synthesis tests for start/poll/import, timeout, and output content (RES-01..RES-04)
 
 ### Phase 8: Content + Wrapper Tests
 **Goal**: Content generation helpers and the NotebookLM infographic wrapper are verified for correctness and idempotency
@@ -120,7 +120,7 @@ Plans:
 | 4. Async Pipeline | v1.1 | 5/5 | Complete | 2026-02-13 |
 | 5. Test Infrastructure | v2.0 | 2/2 | Complete | 2026-02-22 |
 | 6. Database + Errors Tests | v2.0 | 2/2 | Complete | 2026-02-23 |
-| 7. Pipeline + Research Tests | v2.0 | 0/2 | Not started | - |
+| 7. Pipeline + Research Tests | v2.0 | 2/2 | Complete | 2026-02-23 |
 | 8. Content + Wrapper Tests | v2.0 | 3/3 | Complete | 2026-02-23 |
 
 ---

@@ -9,7 +9,7 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Focus** | v2.0: Test Coverage complete — ready for milestone closeout |
+| **Current Focus** | v2.0: Test Coverage shipped (milestone complete) |
 | **Mode** | yolo |
 | **Depth** | quick |
 
@@ -19,10 +19,10 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 Phase: 8 of 8 (Content + Wrapper Tests)
 Plan: 3 of 3 in current phase
-Status: Complete (human verification approved)
-Last activity: 2026-02-23 — approved live wrapper verification and closed Phase 8
+Status: Complete (milestone shipped)
+Last activity: 2026-02-23 — milestone v2.0 marked shipped after phase-8 closure
 
-Progress: [████████████████████] 100% (all v2.0 phases complete)
+Progress: [████████████████████] 100% (all v2.0 phases complete and closed)
 
 ---
 
@@ -99,5 +99,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Phase 8 closed after human verification approval; ready for /gsd-complete-milestone
+Stopped at: Milestone v2.0 complete; ready for next milestone planning
 Resume file: None

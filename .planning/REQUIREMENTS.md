@@ -24,17 +24,17 @@ Retroactive test coverage for all critical business logic. All tests use mocked 
 
 ### Pipeline / Scheduler
 
-- [ ] **PIPE-01**: run_pipeline_async creates a task record and spawns a detached subprocess
-- [ ] **PIPE-02**: _execute_pipeline processes pipeline stages in correct order (NOTEBOOK_CREATED → … → COMPLETED)
-- [ ] **PIPE-03**: Pipeline marks topic as FAILED and records error when any stage raises an exception
-- [ ] **PIPE-04**: Retry logic increments retry count and re-queues topic up to max retry limit
+- [x] **PIPE-01**: run_pipeline_async creates a task record and spawns a detached subprocess
+- [x] **PIPE-02**: _execute_pipeline processes pipeline stages in correct order (NOTEBOOK_CREATED → … → COMPLETED)
+- [x] **PIPE-03**: Pipeline marks topic as FAILED and records error when any stage raises an exception
+- [x] **PIPE-04**: Retry logic increments retry count and re-queues topic up to max retry limit
 
 ### Research
 
-- [ ] **RES-01**: run_research starts deep research, polls until complete, and imports discovered sources into notebook
-- [ ] **RES-02**: Research polling raises a timeout error when max duration is exceeded without completion
-- [ ] **RES-03**: generate_synthesis returns a content string, not a file path
-- [ ] **RES-04**: generate_synthesis content includes discovered source list and research summary section
+- [x] **RES-01**: run_research starts deep research, polls until complete, and imports discovered sources into notebook
+- [x] **RES-02**: Research polling raises a timeout error when max duration is exceeded without completion
+- [x] **RES-03**: generate_synthesis returns a content string, not a file path
+- [x] **RES-04**: generate_synthesis content includes discovered source list and research summary section
 
 ### Content Generation
 
@@ -106,14 +106,14 @@ All v1.1 requirements archived at `.planning/milestones/v1.1-REQUIREMENTS.md`
 | ERR-01 | Phase 6 | Complete |
 | ERR-02 | Phase 6 | Complete |
 | ERR-03 | Phase 6 | Complete |
-| PIPE-01 | Phase 7 | Pending |
-| PIPE-02 | Phase 7 | Pending |
-| PIPE-03 | Phase 7 | Pending |
-| PIPE-04 | Phase 7 | Pending |
-| RES-01 | Phase 7 | Pending |
-| RES-02 | Phase 7 | Pending |
-| RES-03 | Phase 7 | Pending |
-| RES-04 | Phase 7 | Pending |
+| PIPE-01 | Phase 7 | Complete |
+| PIPE-02 | Phase 7 | Complete |
+| PIPE-03 | Phase 7 | Complete |
+| PIPE-04 | Phase 7 | Complete |
+| RES-01 | Phase 7 | Complete |
+| RES-02 | Phase 7 | Complete |
+| RES-03 | Phase 7 | Complete |
+| RES-04 | Phase 7 | Complete |
 | CONTENT-01 | Phase 8 | Complete |
 | CONTENT-02 | Phase 8 | Complete |
 | CONTENT-03 | Phase 8 | Complete |

@@ -61,7 +61,7 @@ article-factory cancel <task-id>
 ## Output Structure
 
 ```
-YYYY-MM-DD/topic-slug/
+output/YYYY-MM-DD/topic-slug/
 ├── research_synthesis.md  # Research findings from deep research
 ├── article.md            # Generated article (2,000-2,500 words)
 ├── infographic.png      # Generated infographic (optional)
@@ -103,12 +103,15 @@ Full async execution with progress tracking:
 
 **Verified:** 11 UAT tests passed, 0 issues
 
-### v2.0 Planning
+### v2.0 Test Coverage - SHIPPED ✅
 
-Extended formats and MCP integration:
-- MCP server integration
-- Quiz/flashcard generation
-- Newsletter/SEO templates
+Retroactive pytest coverage for critical business logic with mocked NotebookLM SDK:
+
+- Test infrastructure with isolated DB and shared SDK mocks ✅
+- Database + error resilience tests ✅
+- Pipeline + research orchestration tests ✅
+- Content helpers + wrapper infographic lifecycle tests ✅
+- Gap-closure + UAT complete (all phase-8 checks passed) ✅
 
 ## Troubleshooting
 
