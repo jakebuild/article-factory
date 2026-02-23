@@ -68,7 +68,20 @@ Each task was committed atomically:
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+### Auto-fixed Issues
+
+**1. [Rule 3 - Blocking] STATE automation commands could not parse legacy STATE headings**
+- **Found during:** Post-task state update step
+- **Issue:** `state advance-plan`, `state update-progress`, and `state record-session` returned parse errors because expected fields were not present in current `STATE.md` format.
+- **Fix:** Kept successful automated metric/decision writes, then manually updated current position/session lines in `STATE.md` to reflect completed 08-03 execution.
+- **Files modified:** `.planning/STATE.md`
+- **Verification:** Confirmed `STATE.md` now records plan 3/3, updated focus/progress, and `Stopped at: Completed 08-03-PLAN.md`.
+- **Committed in:** `0f5e1d6`
+
+---
+
+**Total deviations:** 1 auto-fixed (1 blocking)
+**Impact on plan:** Metadata update path required a manual fallback; task execution and test verification scope were unaffected.
 
 ## Authentication Gates
 
