@@ -7,6 +7,16 @@ import pytest
 from article_factory import research
 
 
+class _FakeLoopClock:
+    def __init__(self, times):
+        self._times = list(times)
+
+    def time(self):
+        if len(self._times) == 1:
+            return self._times[0]
+        return self._times.pop(0)
+
+
 @pytest.mark.asyncio
 async def test_res_01_run_research_starts_polls_and_imports_sources(monkeypatch):
     topic_id = 101
@@ -76,4 +86,47 @@ async def test_res_01_run_research_starts_polls_and_imports_sources(monkeypatch)
     assert set_notebook_id_calls == [(topic_id, notebook_id)]
     assert update_status_calls[0] == (topic_id, "PROCESSING")
     assert update_status_calls[-1] == (topic_id, "COMPLETED")
+    assert increment_retry_calls == []
+
+
+@pytest.mark.asyncio
+async def test_res_02_poll_research_raises_timeout_when_elapsed_exceeds_limit(monkeypatch):
+    topic_id = 202
+    notebook_id = "notebook-res-02"
+
+    update_status_calls = []
+    increment_retry_calls = []
+
+    def fake_get_topic(requested_topic_id):
+        assert requested_topic_id == topic_id
+        return {
+            "id": topic_id,
+            "topic": "RES 02 Topic",
+            "status": "PROCESSING",
+            "notebook_id": notebook_id,
+        }
+
+    def fake_update_status(requested_topic_id, new_status):
+        update_status_calls.append((requested_topic_id, str(new_status)))
+
+    def fake_increment_retry(requested_topic_id):
+        increment_retry_calls.append(requested_topic_id)
+
+    wrapper = AsyncMock()
+    wrapper.poll_research = AsyncMock(return_value={"status": "in_progress"})
+
+    fake_loop = _FakeLoopClock([100.0, 100.1, 101.2])
+
+    monkeypatch.setattr(research, "get_topic", fake_get_topic)
+    monkeypatch.setattr(research, "update_status", fake_update_status)
+    monkeypatch.setattr(research, "increment_retry", fake_increment_retry)
+    monkeypatch.setattr(research, "NotebookLMClientWrapper", lambda: wrapper)
+    monkeypatch.setattr(research.asyncio, "get_event_loop", lambda: fake_loop)
+    monkeypatch.setattr(research.asyncio, "sleep", AsyncMock(return_value=None))
+
+    with pytest.raises(TimeoutError):
+        await research.poll_research(topic_id, poll_interval=1, timeout=1)
+
+    wrapper.poll_research.assert_awaited_once_with(notebook_id)
+    assert update_status_calls == []
     assert increment_retry_calls == []
