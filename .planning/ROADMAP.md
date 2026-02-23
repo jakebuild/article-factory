@@ -1,6 +1,6 @@
 # Roadmap: NotebookLM Article Factory
 
-**Last Updated:** 2026-02-22
+**Last Updated:** 2026-02-23
 
 ---
 
@@ -30,8 +30,8 @@
 
 ### Phases
 
-- [ ] **Phase 5: Test Infrastructure** - pytest-asyncio setup, SDK mocks, DB fixtures, coverage config
-- [ ] **Phase 6: Database + Errors Tests** - Core state layer CRUD, status transitions, and resilience primitives
+- [x] **Phase 5: Test Infrastructure** - pytest-asyncio setup, SDK mocks, DB fixtures, coverage config
+- [x] **Phase 6: Database + Errors Tests** - Core state layer CRUD, status transitions, and resilience primitives
 - [ ] **Phase 7: Pipeline + Research Tests** - Async pipeline execution, stage ordering, retry logic, research orchestration
 - [ ] **Phase 8: Content + Wrapper Tests** - Article generation logic, safety constraints, media idempotency, NLM infographic wrapper
 
@@ -65,11 +65,11 @@ Plans:
   4. Concurrent async DB operations complete without locking errors
   5. rate_limiter blocks a fourth concurrent caller when three slots are already held
   6. circuit_breaker opens after hitting the failure threshold and rejects subsequent calls; resets after cooldown elapses
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: Database CRUD tests (DB-01..04)
-- [ ] 06-02: Errors module tests — rate limiter and circuit breaker (ERR-01..03)
+- [x] 06-01-PLAN.md — database CRUD/retrieval, status transitions, unknown ID handling, async concurrency tests (DB-01..DB-04)
+- [x] 06-02-PLAN.md — errors module resilience tests for rate limiter blocking and circuit breaker open/recovery (ERR-01..ERR-03)
 
 ### Phase 7: Pipeline + Research Tests
 **Goal**: Async pipeline stage execution and research orchestration are verified with mocked SDK and subprocess calls
@@ -117,8 +117,8 @@ Plans:
 | 2. Research Layer | v1.1 | 2/2 | Complete | 2026-02-12 |
 | 3. Content Delivery | v1.1 | 3/3 | Complete | 2026-02-12 |
 | 4. Async Pipeline | v1.1 | 5/5 | Complete | 2026-02-13 |
-| 5. Test Infrastructure | v2.0 | 0/1 | Not started | - |
-| 6. Database + Errors Tests | v2.0 | 0/2 | Not started | - |
+| 5. Test Infrastructure | v2.0 | 2/2 | Complete | 2026-02-22 |
+| 6. Database + Errors Tests | v2.0 | 2/2 | Complete | 2026-02-23 |
 | 7. Pipeline + Research Tests | v2.0 | 0/2 | Not started | - |
 | 8. Content + Wrapper Tests | v2.0 | 0/2 | Not started | - |
 
