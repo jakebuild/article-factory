@@ -156,3 +156,37 @@ async def test_nlm_04_generate_infographic_raises_when_poll_status_failed(monkey
 
     client.artifacts.generate_infographic.assert_awaited_once()
     assert client.artifacts._list_raw.await_count == 3
+
+
+@pytest.mark.asyncio
+async def test_nlm_05_generate_infographic_raises_timeout_when_poll_never_completes(monkeypatch):
+    raw_before = [_artifact("completed-existing", ArtifactStatus.COMPLETED)]
+    raw_pending = [
+        _artifact("completed-existing", ArtifactStatus.COMPLETED),
+        _artifact("new-timeout", 0),
+    ]
+
+    call_count = 0
+
+    async def list_raw_side_effect(_notebook_id):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            return raw_before
+        return raw_pending
+
+    client = MagicMock()
+    client.artifacts = MagicMock()
+    client.artifacts._list_raw = AsyncMock(side_effect=list_raw_side_effect)
+    client.artifacts.delete = AsyncMock()
+    client.artifacts.generate_infographic = AsyncMock(return_value=None)
+
+    wrapper = NotebookLMClientWrapper()
+    monkeypatch.setattr(wrapper, "get_client", AsyncMock(return_value=_ClientContext(client)))
+    monkeypatch.setattr(asyncio, "sleep", AsyncMock(return_value=None))
+
+    with pytest.raises(RuntimeError, match="timed out"):
+        await wrapper.generate_infographic("nb-nlm-05")
+
+    client.artifacts.generate_infographic.assert_awaited_once()
+    assert client.artifacts._list_raw.await_count == 62
