@@ -38,12 +38,12 @@ Retroactive test coverage for all critical business logic. All tests use mocked 
 
 ### Content Generation
 
-- [ ] **CONTENT-01**: apply_safety_constraints raises ValueError when prompt matches a disallowed pattern
-- [ ] **CONTENT-02**: enforce_source_citations raises ValueError when article cites sources not present in notebook
-- [ ] **CONTENT-03**: validate_article_length returns False for articles below min or above max word count
-- [ ] **CONTENT-04**: generate_article defaults to report format (not synthesis/chat)
-- [ ] **CONTENT-05**: get_output_dir resolves topic_name correctly for both dict topics (from DB) and ORM object topics
-- [ ] **CONTENT-06**: generate_infographic returns existing file path immediately without triggering re-generation
+- [x] **CONTENT-01**: apply_safety_constraints raises ValueError when prompt matches a disallowed pattern
+- [x] **CONTENT-02**: enforce_source_citations raises ValueError when article cites sources not present in notebook
+- [x] **CONTENT-03**: validate_article_length returns False for articles below min or above max word count
+- [x] **CONTENT-04**: generate_article defaults to report format (not synthesis/chat)
+- [x] **CONTENT-05**: get_output_dir resolves topic_name correctly for both dict topics (from DB) and ORM object topics
+- [x] **CONTENT-06**: generate_infographic returns existing file path immediately without triggering re-generation
 
 ### Errors
 
@@ -53,11 +53,11 @@ Retroactive test coverage for all critical business logic. All tests use mocked 
 
 ### NotebookLM Wrapper
 
-- [ ] **NLM-01**: generate_infographic deletes all FAILED infographic artifacts before triggering new generation
-- [ ] **NLM-02**: generate_infographic identifies the newly created artifact via before/after artifact list diff
-- [ ] **NLM-03**: generate_infographic polls _list_raw until artifact reaches ArtifactStatus.COMPLETED and returns task_id
-- [ ] **NLM-04**: generate_infographic raises RuntimeError when artifact reaches ArtifactStatus.FAILED
-- [ ] **NLM-05**: generate_infographic raises RuntimeError when polling exceeds the timeout duration
+- [x] **NLM-01**: generate_infographic deletes all FAILED infographic artifacts before triggering new generation
+- [x] **NLM-02**: generate_infographic identifies the newly created artifact via before/after artifact list diff
+- [x] **NLM-03**: generate_infographic polls _list_raw until artifact reaches ArtifactStatus.COMPLETED and returns task_id
+- [x] **NLM-04**: generate_infographic raises RuntimeError when artifact reaches ArtifactStatus.FAILED
+- [x] **NLM-05**: generate_infographic raises RuntimeError when polling exceeds the timeout duration
 
 ## Previous Requirements (v1.0 + v1.1 — COMPLETED)
 
@@ -114,17 +114,17 @@ All v1.1 requirements archived at `.planning/milestones/v1.1-REQUIREMENTS.md`
 | RES-02 | Phase 7 | Pending |
 | RES-03 | Phase 7 | Pending |
 | RES-04 | Phase 7 | Pending |
-| CONTENT-01 | Phase 8 | Pending |
-| CONTENT-02 | Phase 8 | Pending |
-| CONTENT-03 | Phase 8 | Pending |
-| CONTENT-04 | Phase 8 | Pending |
-| CONTENT-05 | Phase 8 | Pending |
-| CONTENT-06 | Phase 8 | Pending |
-| NLM-01 | Phase 8 | Pending |
-| NLM-02 | Phase 8 | Pending |
-| NLM-03 | Phase 8 | Pending |
-| NLM-04 | Phase 8 | Pending |
-| NLM-05 | Phase 8 | Pending |
+| CONTENT-01 | Phase 8 | Complete |
+| CONTENT-02 | Phase 8 | Complete |
+| CONTENT-03 | Phase 8 | Complete |
+| CONTENT-04 | Phase 8 | Complete |
+| CONTENT-05 | Phase 8 | Complete |
+| CONTENT-06 | Phase 8 | Complete |
+| NLM-01 | Phase 8 | Complete |
+| NLM-02 | Phase 8 | Complete |
+| NLM-03 | Phase 8 | Complete |
+| NLM-04 | Phase 8 | Complete |
+| NLM-05 | Phase 8 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 30 total

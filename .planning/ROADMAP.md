@@ -33,7 +33,7 @@
 - [x] **Phase 5: Test Infrastructure** - pytest-asyncio setup, SDK mocks, DB fixtures, coverage config
 - [x] **Phase 6: Database + Errors Tests** - Core state layer CRUD, status transitions, and resilience primitives
 - [ ] **Phase 7: Pipeline + Research Tests** - Async pipeline execution, stage ordering, retry logic, research orchestration
-- [ ] **Phase 8: Content + Wrapper Tests** - Article generation logic, safety constraints, media idempotency, NLM infographic wrapper
+- [x] **Phase 8: Content + Wrapper Tests** - Article generation logic, safety constraints, media idempotency, NLM infographic wrapper
 
 ---
 
@@ -48,7 +48,7 @@
   2. NotebookLM SDK (client, artifacts, research, chat APIs) is fully replaceable via a fixture — no real HTTP calls are made
   3. Each test gets an isolated in-memory SQLite database pre-seeded with topic rows
   4. `pytest --cov` produces a coverage report showing overall coverage ≥70%
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [ ] 05-01-PLAN.md — pytest config, in-memory DB fixture, SDK mock fixture, coverage validation
@@ -83,11 +83,11 @@ Plans:
   5. run_research starts deep research, polls until complete, and imports discovered sources into the notebook
   6. Research polling raises a timeout error when max duration is exceeded without a completion signal
   7. generate_synthesis returns a string containing both discovered sources and a research summary section
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Pipeline scheduler tests (PIPE-01..04)
-- [ ] 07-02: Research module tests (RES-01..04)
+- [ ] 07-01-PLAN.md — Pipeline scheduler tests for detached spawn, stage ordering, failure handling, and retry logic (PIPE-01..PIPE-04)
+- [ ] 07-02-PLAN.md — Research orchestration and synthesis tests for start/poll/import, timeout, and output content (RES-01..RES-04)
 
 ### Phase 8: Content + Wrapper Tests
 **Goal**: Content generation helpers and the NotebookLM infographic wrapper are verified for correctness and idempotency
@@ -101,11 +101,12 @@ Plans:
   5. get_output_dir resolves topic_name correctly whether the topic is a dict (from DB) or an ORM object
   6. generate_infographic returns the existing file path immediately without triggering SDK calls when the file already exists
   7. generate_infographic in the NLM wrapper deletes FAILED artifacts, detects new artifact via before/after diff, polls until COMPLETED, and raises RuntimeError on FAILED status or timeout
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: Content generation helper tests (CONTENT-01..06)
-- [ ] 08-02: NotebookLM wrapper infographic tests (NLM-01..05)
+- [x] 08-01-PLAN.md — Content helper and media idempotency tests for safety/citations/length/default-format plus output-dir shape handling (CONTENT-01..CONTENT-06)
+- [x] 08-02-PLAN.md — NotebookLM wrapper infographic tests for failed cleanup, artifact diffing, poll completion/failure, and timeout handling (NLM-01..NLM-05)
+- [x] 08-03-PLAN.md — gap closure: add deterministic CONTENT helper assertions to satisfy test artifact substantiveness threshold (tests/test_article_generation.py >= 80 lines)
 
 ---
 
@@ -120,7 +121,7 @@ Plans:
 | 5. Test Infrastructure | v2.0 | 2/2 | Complete | 2026-02-22 |
 | 6. Database + Errors Tests | v2.0 | 2/2 | Complete | 2026-02-23 |
 | 7. Pipeline + Research Tests | v2.0 | 0/2 | Not started | - |
-| 8. Content + Wrapper Tests | v2.0 | 0/2 | Not started | - |
+| 8. Content + Wrapper Tests | v2.0 | 3/3 | Complete | 2026-02-23 |
 
 ---
 
