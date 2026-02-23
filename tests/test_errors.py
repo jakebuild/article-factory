@@ -55,6 +55,8 @@ async def test_err_02_circuit_breaker_opens_and_rejects_calls():
     with pytest.raises(CircuitOpenError):
         await breaker.call(fail_call)
 
+    assert breaker._failure_count == 2
+
 
 @pytest.mark.asyncio
 async def test_err_03_circuit_breaker_recovers_after_cooldown():
