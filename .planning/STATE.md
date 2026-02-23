@@ -9,7 +9,7 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Focus** | v2.0: Test Coverage — Phase 8: Content + Wrapper Tests (ready to plan) |
+| **Current Focus** | v2.0: Test Coverage — Phase 8 wrapper contract verification in progress |
 | **Mode** | yolo |
 | **Depth** | quick |
 
@@ -18,18 +18,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 8 of 8 (Content + Wrapper Tests)
-Plan: 1 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-02-23 — completed 07-02 research orchestration and synthesis tests (RES-01..RES-04)
+Plan: 2 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-23 — completed 08-02 wrapper infographic tests (NLM-01..NLM-05)
 
-Progress: [██████████████████░░] 88% (phases 1-7 complete, phase 8 pending)
+Progress: [███████████████████░] 95% (phases 1-7 complete, phase 8 nearing completion)
 
 ---
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18 (phases 1-7)
+- Total plans completed: 19 (phases 1-7 + phase 8 plan 02)
 - Average duration: ~28 min estimated
 - Total execution time: ~6h 12m (through phase 7 plan 2)
 
@@ -44,17 +44,17 @@ Progress: [██████████████████░░] 88% (ph
 | 5. Test Infrastructure | 2/2 | Complete |
 | 6. DB + Errors Tests | 2/2 | Complete |
 | 7. Pipeline + Research Tests | 2/2 | Complete |
-| 8. Content + Wrapper Tests | 0/2 | Not started |
+| 8. Content + Wrapper Tests | 1/2 | In progress |
 
 **Recent executions:**
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
+| Phase 08 P02 | 1 min | 3 tasks | 1 file |
 | Phase 05 P02 | 1 min | 3 tasks | 3 files |
 | Phase 06 P02 | 2 min | 3 tasks | 2 files |
 | Phase 06 P01 | 2 min | 3 tasks | 2 files |
 | Phase 07 P01 | 3 min | 3 tasks | 2 files |
-| Phase 07 P02 | 1 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -78,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 07]: Capture scheduler stage progression via notify_progress emissions to keep tests aligned with production progress updates
 - [Phase 07]: Expose task_id from start_research into run_research so source import executes in the same orchestration path
 - [Phase 07]: Render synthesis source entries via dict-or-attribute access to support both fixture and SDK source shapes
+- [Phase 08]: Use direct wrapper invocation with mocked async client contexts for deterministic infographic contract tests.
+- [Phase 08]: Retain existing generate_infographic implementation and enforce behavior through NLM-01..NLM-05 regression tests.
 
 ### Pending Todos
 
@@ -92,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 07-02-PLAN.md
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
