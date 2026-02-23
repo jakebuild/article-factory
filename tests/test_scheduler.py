@@ -2,9 +2,12 @@
 
 import subprocess
 import sys
+from unittest.mock import AsyncMock
+
+import pytest
 
 from article_factory.database import create_topic
-from article_factory.scheduler import get_task, run_pipeline_async
+from article_factory.scheduler import _execute_pipeline, create_task, get_task, run_pipeline_async
 
 
 def test_pipe_01_run_pipeline_async_creates_task_and_spawns_detached_worker(monkeypatch):
@@ -46,3 +49,133 @@ def test_pipe_01_run_pipeline_async_creates_task_and_spawns_detached_worker(monk
     assert kwargs["start_new_session"] is True
     assert kwargs["stdout"] is subprocess.DEVNULL
     assert kwargs["stderr"] is subprocess.DEVNULL
+
+
+@pytest.mark.asyncio
+async def test_pipe_02_execute_pipeline_advances_stages_in_documented_order(monkeypatch):
+    created_topic = create_topic(
+        topic="PIPE-02 scheduler topic",
+        prompt="Validate stage ordering",
+    )
+    assert created_topic is not None
+
+    import article_factory.article as article_module
+    import article_factory.audio as audio_module
+    import article_factory.media as media_module
+    import article_factory.notebooks as notebooks_module
+    import article_factory.output as output_module
+    import article_factory.scheduler as scheduler_module
+    import article_factory.research as research_module
+
+    monkeypatch.setattr(
+        notebooks_module,
+        "create_notebook_for_topic",
+        AsyncMock(return_value="notebook-1"),
+    )
+    monkeypatch.setattr(
+        notebooks_module,
+        "trigger_deep_research",
+        AsyncMock(return_value="research-task-1"),
+    )
+    monkeypatch.setattr(
+        notebooks_module,
+        "wait_for_research_completion",
+        AsyncMock(return_value={"sources_imported": 3}),
+    )
+    monkeypatch.setattr(
+        research_module,
+        "generate_synthesis",
+        AsyncMock(return_value="# Synthesis"),
+    )
+    monkeypatch.setattr(
+        article_module,
+        "generate_article",
+        AsyncMock(return_value="# Article"),
+    )
+    monkeypatch.setattr(
+        media_module,
+        "generate_infographic",
+        AsyncMock(return_value="/tmp/infographic.png"),
+    )
+    monkeypatch.setattr(
+        audio_module,
+        "generate_audio_briefing",
+        AsyncMock(return_value="/tmp/audio.mp3"),
+    )
+    monkeypatch.setattr(
+        output_module,
+        "export_all_artifacts",
+        lambda *_args, **_kwargs: {
+            "output_dir": "2026-02-23__pipe-02",
+            "article": "article.md",
+            "infographic": "infographic.png",
+        },
+    )
+
+    recorded_stages = []
+
+    def record_notify(_task_id, stage, _progress_percent, _message=None):
+        recorded_stages.append(stage)
+
+    monkeypatch.setattr(scheduler_module, "notify_progress", record_notify)
+
+    task_id = create_task(created_topic["id"], prompt="Generate article")
+    await _execute_pipeline(task_id)
+
+    assert recorded_stages == [
+        "NOTEBOOK_CREATED",
+        "RESEARCH_TRIGGERED",
+        "RESEARCH_COMPLETED",
+        "SYNTHESIS_DONE",
+        "ARTICLE_DONE",
+        "MEDIA_DONE",
+        "COMPLETED",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_pipe_03_execute_pipeline_records_failed_stage_error_message(monkeypatch):
+    created_topic = create_topic(
+        topic="PIPE-03 scheduler topic",
+        prompt="Validate failed stage recording",
+    )
+    assert created_topic is not None
+
+    import article_factory.media as media_module
+    import article_factory.notebooks as notebooks_module
+    import article_factory.research as research_module
+
+    monkeypatch.setattr(
+        notebooks_module,
+        "create_notebook_for_topic",
+        AsyncMock(return_value="notebook-2"),
+    )
+    monkeypatch.setattr(
+        notebooks_module,
+        "trigger_deep_research",
+        AsyncMock(return_value="research-task-2"),
+    )
+    monkeypatch.setattr(
+        notebooks_module,
+        "wait_for_research_completion",
+        AsyncMock(return_value={"sources_imported": 1}),
+    )
+    monkeypatch.setattr(
+        research_module,
+        "generate_synthesis",
+        AsyncMock(return_value="# Synthesis"),
+    )
+
+    async def raise_infographic_error(_topic_id):
+        raise RuntimeError("pipeline infographic failure")
+
+    monkeypatch.setattr(media_module, "generate_infographic", raise_infographic_error)
+
+    task_id = create_task(created_topic["id"], prompt="Generate article")
+    await _execute_pipeline(task_id)
+
+    persisted_task = get_task(task_id)
+    assert persisted_task is not None
+    assert persisted_task["status"] == "FAILED"
+    assert persisted_task["error_message"] is not None
+    assert "Infographic generation failed: pipeline infographic failure" in persisted_task["error_message"]
