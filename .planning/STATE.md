@@ -9,7 +9,7 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Focus** | v2.0: Test Coverage — Phase 8 plan 02 wrapper contract verification next |
+| **Current Focus** | v2.0: Test Coverage — Phase 8 gap closure complete, ready for re-verification |
 | **Mode** | yolo |
 | **Depth** | quick |
 
@@ -18,18 +18,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 8 of 8 (Content + Wrapper Tests)
-Plan: 2 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-23 — completed 08-01 content helper and media idempotency tests (CONTENT-01..CONTENT-06)
+Plan: 3 of 3 in current phase
+Status: In progress (awaiting phase re-verification)
+Last activity: 2026-02-23 — completed 08-03 gap closure for CONTENT helper artifact threshold
 
-Progress: [███████████████████░] 95% (phases 1-7 complete, phase 8 nearing completion)
+Progress: [████████████████████] 100% (all phase plans executed; awaiting verification closeout)
 
 ---
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (phases 1-7 + phase 8 plan 01)
+- Total plans completed: 20 (phases 1-7 + phase 8 plans)
 - Average duration: ~28 min estimated
 - Total execution time: ~6h 12m (through phase 7 plan 2)
 
@@ -44,7 +44,7 @@ Progress: [███████████████████░] 95% (ph
 | 5. Test Infrastructure | 2/2 | Complete |
 | 6. DB + Errors Tests | 2/2 | Complete |
 | 7. Pipeline + Research Tests | 2/2 | Complete |
-| 8. Content + Wrapper Tests | 1/2 | In progress |
+| 8. Content + Wrapper Tests | 3/3 | Complete |
 
 **Recent executions:**
 
@@ -55,6 +55,7 @@ Progress: [███████████████████░] 95% (ph
 | Phase 06 P01 | 2 min | 3 tasks | 2 files |
 | Phase 07 P01 | 3 min | 3 tasks | 2 files |
 | Phase 08 P01 | 3 min | 3 tasks | 3 files |
+| Phase 08 P03 | 1 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 08]: Retain existing generate_infographic implementation and enforce behavior through NLM-01..NLM-05 regression tests.
 - [Phase 08]: Map each CONTENT-01..CONTENT-06 truth to explicit deterministic test assertions
 - [Phase 08]: Harden media get_output_dir to resolve topic/date from dict and ORM-like objects
+- [Phase 08]: Closed the CONTENT helper min-lines gate using meaningful deterministic assertions rather than placeholder lines.
+- [Phase 08]: Kept gap-closure verification scoped to offline fixture-backed phase-8 pytest modules.
 
 ### Pending Todos
 
@@ -96,5 +99,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-01-PLAN.md
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
