@@ -79,6 +79,12 @@ def test_content_03_validate_article_length_above_maximum_returns_false():
     assert validate_article_length(too_long, min_words=20, max_words=100) is False
 
 
+def test_content_03_validate_article_length_within_range_returns_true():
+    """CONTENT-03: in-range article length returns True."""
+    in_range = "word " * 60
+    assert validate_article_length(in_range, min_words=20, max_words=100) is True
+
+
 def test_content_04_generate_article_defaults_to_report_format():
     """CONTENT-04: generate_article defaults format to report when omitted."""
     sig = inspect.signature(generate_article)
