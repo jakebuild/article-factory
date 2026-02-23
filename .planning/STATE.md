@@ -9,7 +9,7 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Focus** | v2.0: Test Coverage — Phase 8 wrapper contract verification in progress |
+| **Current Focus** | v2.0: Test Coverage — Phase 8 plan 02 wrapper contract verification next |
 | **Mode** | yolo |
 | **Depth** | quick |
 
@@ -20,7 +20,7 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 Phase: 8 of 8 (Content + Wrapper Tests)
 Plan: 2 of 2 in current phase
 Status: In progress
-Last activity: 2026-02-23 — completed 08-02 wrapper infographic tests (NLM-01..NLM-05)
+Last activity: 2026-02-23 — completed 08-01 content helper and media idempotency tests (CONTENT-01..CONTENT-06)
 
 Progress: [███████████████████░] 95% (phases 1-7 complete, phase 8 nearing completion)
 
@@ -29,7 +29,7 @@ Progress: [███████████████████░] 95% (ph
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (phases 1-7 + phase 8 plan 02)
+- Total plans completed: 19 (phases 1-7 + phase 8 plan 01)
 - Average duration: ~28 min estimated
 - Total execution time: ~6h 12m (through phase 7 plan 2)
 
@@ -50,11 +50,11 @@ Progress: [███████████████████░] 95% (ph
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
-| Phase 08 P02 | 1 min | 3 tasks | 1 file |
 | Phase 05 P02 | 1 min | 3 tasks | 3 files |
 | Phase 06 P02 | 2 min | 3 tasks | 2 files |
 | Phase 06 P01 | 2 min | 3 tasks | 2 files |
 | Phase 07 P01 | 3 min | 3 tasks | 2 files |
+| Phase 08 P01 | 3 min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -80,6 +80,8 @@ Recent decisions affecting current work:
 - [Phase 07]: Render synthesis source entries via dict-or-attribute access to support both fixture and SDK source shapes
 - [Phase 08]: Use direct wrapper invocation with mocked async client contexts for deterministic infographic contract tests.
 - [Phase 08]: Retain existing generate_infographic implementation and enforce behavior through NLM-01..NLM-05 regression tests.
+- [Phase 08]: Map each CONTENT-01..CONTENT-06 truth to explicit deterministic test assertions
+- [Phase 08]: Harden media get_output_dir to resolve topic/date from dict and ORM-like objects
 
 ### Pending Todos
 
@@ -94,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-02-PLAN.md
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None
