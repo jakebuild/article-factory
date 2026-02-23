@@ -6,7 +6,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from article_factory.database import create_topic
+from article_factory.database import create_topic, get_topic, increment_retry, update_status
+from article_factory.models import TopicStatus
 from article_factory.scheduler import _execute_pipeline, create_task, get_task, run_pipeline_async
 
 
@@ -179,3 +180,67 @@ async def test_pipe_03_execute_pipeline_records_failed_stage_error_message(monke
     assert persisted_task["status"] == "FAILED"
     assert persisted_task["error_message"] is not None
     assert "Infographic generation failed: pipeline infographic failure" in persisted_task["error_message"]
+
+
+@pytest.mark.asyncio
+async def test_pipe_04_retry_requeues_topic_below_max_retries(monkeypatch):
+    created_topic = create_topic(
+        topic="PIPE-04 retry below max",
+        prompt="Validate retry re-queue path",
+    )
+    assert created_topic is not None
+    topic_id = created_topic["id"]
+
+    assert update_status(topic_id, TopicStatus.PENDING) is not None
+    assert update_status(topic_id, TopicStatus.PROCESSING) is not None
+
+    import article_factory.notebooks as notebooks_module
+
+    monkeypatch.setattr(
+        notebooks_module,
+        "create_notebook_for_topic",
+        AsyncMock(side_effect=RuntimeError("retryable notebook failure")),
+    )
+
+    task_id = create_task(topic_id)
+    await _execute_pipeline(task_id)
+
+    persisted_task = get_task(task_id)
+    assert persisted_task is not None
+    assert persisted_task["status"] == "FAILED"
+
+    persisted_topic = get_topic(topic_id)
+    assert persisted_topic is not None
+    assert persisted_topic["retry_count"] == 1
+    assert persisted_topic["status"] == TopicStatus.PENDING.value
+
+
+@pytest.mark.asyncio
+async def test_pipe_04_retry_stops_requeue_at_max_retries(monkeypatch):
+    created_topic = create_topic(
+        topic="PIPE-04 retry max reached",
+        prompt="Validate retry cap path",
+    )
+    assert created_topic is not None
+    topic_id = created_topic["id"]
+
+    assert update_status(topic_id, TopicStatus.PENDING) is not None
+    assert update_status(topic_id, TopicStatus.PROCESSING) is not None
+    assert increment_retry(topic_id) is not None
+    assert increment_retry(topic_id) is not None
+
+    import article_factory.notebooks as notebooks_module
+
+    monkeypatch.setattr(
+        notebooks_module,
+        "create_notebook_for_topic",
+        AsyncMock(side_effect=RuntimeError("terminal notebook failure")),
+    )
+
+    task_id = create_task(topic_id)
+    await _execute_pipeline(task_id)
+
+    persisted_topic = get_topic(topic_id)
+    assert persisted_topic is not None
+    assert persisted_topic["retry_count"] == 3
+    assert persisted_topic["status"] == TopicStatus.FAILED.value

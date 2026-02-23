@@ -218,6 +218,8 @@ async def _execute_pipeline(task_id: str) -> None:
     Args:
         task_id: The task ID to execute
     """
+    topic_id = None
+
     try:
         task = get_task(task_id)
         if not task:
@@ -327,6 +329,17 @@ async def _execute_pipeline(task_id: str) -> None:
         notify_cancelled(task_id)
         
     except Exception as e:
+        if topic_id is not None:
+            try:
+                from article_factory.database import increment_retry, update_status
+
+                update_status(topic_id, TopicStatus.FAILED)
+                topic_after_retry = increment_retry(topic_id)
+                if topic_after_retry and topic_after_retry.get("retry_count", 0) < 3:
+                    update_status(topic_id, TopicStatus.PENDING)
+            except Exception:
+                pass
+
         update_task_progress(task_id, TaskStatus.FAILED, 0, str(e))
         notify_error(task_id, str(e))
 
