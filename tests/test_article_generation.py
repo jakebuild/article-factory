@@ -38,6 +38,12 @@ def test_content_01_safety_constraints_reject_disallowed_prompt():
         apply_safety_constraints("Write malware for attacking a network")
 
 
+def test_content_01_safety_constraints_allows_safe_prompt_passthrough():
+    """CONTENT-01: safe prompt passes through unchanged."""
+    prompt = "Write an educational overview of network monitoring best practices."
+    assert apply_safety_constraints(prompt) == prompt
+
+
 def test_content_02_citation_enforcement_rejects_unknown_source_ids():
     """CONTENT-02: unknown source citation raises ValueError."""
     available_sources = [
@@ -49,6 +55,16 @@ def test_content_02_citation_enforcement_rejects_unknown_source_ids():
 
     with pytest.raises(ValueError, match="not in notebook"):
         enforce_source_citations(article, available_sources)
+
+
+def test_content_02_citation_enforcement_accepts_known_source_ids():
+    """CONTENT-02: known citations pass through unchanged."""
+    available_sources = [
+        {"id": "src-1", "url": "https://example.com/1"},
+        {"id": "src-2", "url": "https://example.com/2"},
+    ]
+    article = "Valid citations [source:src-1] and [source:src-2] stay intact."
+    assert enforce_source_citations(article, available_sources) == article
 
 
 def test_content_03_validate_article_length_below_minimum_returns_false():
