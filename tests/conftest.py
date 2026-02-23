@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "src"
@@ -22,8 +23,9 @@ from article_factory.notebook_lm import NotebookLMClientWrapper
 def db_session(monkeypatch):
     """Isolated in-memory SQLite session pre-seeded with two topics."""
     engine = create_engine(
-        "sqlite:///:memory:",
+        "sqlite://",
         connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
