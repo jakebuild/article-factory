@@ -45,7 +45,7 @@ async def start_research(topic_id: int):
     if topic_status != 'PENDING':
         raise ValueError(f"Topic {topic_id} is {topic_status}, expected PENDING")
     
-    topic_name = topic_data.get('topic')
+    topic_name = topic_data.get('topic') or f"topic-{topic_id}"
     topic_prompt = topic_data.get('prompt', '')
     
     client = NotebookLMClientWrapper()
@@ -61,11 +61,14 @@ async def start_research(topic_id: int):
     set_notebook_id(topic_id, notebook_id)
     
     # Trigger research
+    task_id = None
     await rate_limiter.acquire()
     try:
-        await circuit_breaker.call(
+        trigger_result = await circuit_breaker.call(
             client.start_research, notebook_id, topic_prompt or topic_name
         )
+        if isinstance(trigger_result, dict):
+            task_id = trigger_result.get("task_id")
     except CircuitOpenError:
         # Research trigger failed but notebook was created
         raise
@@ -75,7 +78,7 @@ async def start_research(topic_id: int):
     # Update status to PROCESSING
     update_status(topic_id, 'PROCESSING')
     
-    return {"notebook_id": notebook_id, "status": "PROCESSING"}
+    return {"notebook_id": notebook_id, "status": "PROCESSING", "task_id": task_id}
 
 
 async def poll_research(topic_id: int, poll_interval: int = 60, timeout: int = 2700):
@@ -154,11 +157,24 @@ async def run_research(topic_id: int):
     """
     try:
         # Start the research
-        result = await start_research(topic_id)
-        
+        start_result = await start_research(topic_id)
+
         # Poll for completion
         result = await poll_research(topic_id)
-        
+
+        notebook_id = start_result.get("notebook_id")
+        task_id = start_result.get("task_id")
+        sources = result.get("sources", []) if isinstance(result, dict) else []
+
+        imported_sources = []
+        if notebook_id and task_id and sources:
+            client = NotebookLMClientWrapper()
+            imported_sources = await client.import_sources(notebook_id, task_id, sources)
+
+        if isinstance(result, dict):
+            result["notebook_id"] = notebook_id
+            result["imported_sources"] = imported_sources
+
         return result
         
     except Exception as e:
