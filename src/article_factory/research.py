@@ -211,6 +211,11 @@ async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
     sources_info = poll_result.get('sources', [])
     summary = poll_result.get('summary', '')
 
+    def source_field(source, key, default=""):
+        if isinstance(source, dict):
+            return source.get(key, default)
+        return getattr(source, key, default)
+
     lines = []
     lines.append("# Research Synthesis\n")
     lines.append(f"Generated: {datetime.now().isoformat()}")
@@ -220,8 +225,8 @@ async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
 
     lines.append("## Discovered Sources\n")
     for i, src in enumerate(sources_info, 1):
-        title = src.get('title', 'Untitled')
-        url = src.get('url', '')
+        title = source_field(src, "title", "Untitled")
+        url = source_field(src, "url", "")
         lines.append(f"{i}. **{title}**")
         if url:
             lines.append(f"   URL: {url}")
@@ -230,7 +235,9 @@ async def generate_synthesis(notebook_id: str, topic_slug: str) -> str:
     if sources:
         lines.append("\n## Imported Sources in Notebook\n")
         for s in sources:
-            lines.append(f"- {s.id}: {s.title}")
+            source_id = source_field(s, "id", "unknown")
+            title = source_field(s, "title", "Untitled")
+            lines.append(f"- {source_id}: {title}")
 
     if summary:
         lines.append("\n## Research Summary\n")

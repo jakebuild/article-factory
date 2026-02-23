@@ -17,6 +17,13 @@ class _FakeLoopClock:
         return self._times.pop(0)
 
 
+class _SourceObject:
+    def __init__(self, source_id, title, url=""):
+        self.id = source_id
+        self.title = title
+        self.url = url
+
+
 @pytest.mark.asyncio
 async def test_res_01_run_research_starts_polls_and_imports_sources(monkeypatch):
     topic_id = 101
@@ -130,3 +137,61 @@ async def test_res_02_poll_research_raises_timeout_when_elapsed_exceeds_limit(mo
     wrapper.poll_research.assert_awaited_once_with(notebook_id)
     assert update_status_calls == []
     assert increment_retry_calls == []
+
+
+@pytest.mark.asyncio
+async def test_res_03_generate_synthesis_returns_string_content(monkeypatch):
+    notebook_id = "notebook-res-03"
+
+    wrapper = AsyncMock()
+    wrapper.list_sources = AsyncMock(
+        return_value=[
+            _SourceObject("src-obj-1", "Imported Object Source"),
+            {"id": "src-dict-2", "title": "Imported Dict Source"},
+        ]
+    )
+    wrapper.poll_research = AsyncMock(
+        return_value={
+            "status": "completed",
+            "sources": [
+                _SourceObject("disc-obj", "Discovered Object Source", "https://example.com/object"),
+                {"title": "Discovered Dict Source", "url": "https://example.com/dict"},
+            ],
+            "summary": "Key findings from offline synthesis test.",
+        }
+    )
+
+    monkeypatch.setattr(research, "NotebookLMClientWrapper", lambda: wrapper)
+
+    synthesis = await research.generate_synthesis(notebook_id, "res-03-topic")
+
+    assert isinstance(synthesis, str)
+    assert synthesis
+
+
+@pytest.mark.asyncio
+async def test_res_04_generate_synthesis_includes_sources_and_summary_sections(monkeypatch):
+    notebook_id = "notebook-res-04"
+
+    wrapper = AsyncMock()
+    wrapper.list_sources = AsyncMock(
+        return_value=[_SourceObject("src-100", "Imported Source 100")]
+    )
+    wrapper.poll_research = AsyncMock(
+        return_value={
+            "status": "completed",
+            "sources": [
+                {"title": "Discovered Source A", "url": "https://example.com/a"}
+            ],
+            "summary": "This is the research summary body.",
+        }
+    )
+
+    monkeypatch.setattr(research, "NotebookLMClientWrapper", lambda: wrapper)
+
+    synthesis = await research.generate_synthesis(notebook_id, "res-04-topic")
+
+    assert "## Discovered Sources" in synthesis
+    assert "Discovered Source A" in synthesis
+    assert "## Research Summary" in synthesis
+    assert "This is the research summary body." in synthesis
