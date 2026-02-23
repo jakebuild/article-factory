@@ -1,5 +1,6 @@
 """Tests for media output path resolution and infographic idempotency."""
 
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -15,9 +16,6 @@ class TopicRecord:
         self.topic = topic
         self.created_at = created_at
         self.notebook_id = notebook_id
-
-    def get(self, key, default=None):
-        return getattr(self, key, default)
 
 
 def test_content_05_get_output_dir_supports_dict_topic_shape(monkeypatch):
@@ -43,7 +41,7 @@ def test_content_05_get_output_dir_supports_dict_topic_shape(monkeypatch):
 
 def test_content_05_get_output_dir_supports_object_topic_shape(monkeypatch):
     """CONTENT-05: get_output_dir resolves expected path from ORM-like object topic."""
-    topic = TopicRecord("Quantum Computing", "2026-01-15T09:00:00")
+    topic = TopicRecord("Quantum Computing", datetime(2026, 1, 15, 9, 0, 0))
 
     mkdir_calls = []
     monkeypatch.setattr(media_module, "get_topic", lambda _: topic)

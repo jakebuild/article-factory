@@ -22,8 +22,27 @@ def get_output_dir(topic_id: int) -> str:
     topic = get_topic(topic_id)
     if topic is None:
         raise ValueError(f"Topic {topic_id} not found")
-    topic_name = topic.get("topic") if isinstance(topic, dict) else topic.topic
-    date = topic.get("created_at", "")[:10] if topic.get("created_at") else datetime.now().strftime("%Y-%m-%d")
+
+    if isinstance(topic, dict):
+        topic_name = topic.get("topic")
+        created_at = topic.get("created_at")
+    else:
+        topic_name = getattr(topic, "topic", None)
+        created_at = getattr(topic, "created_at", None)
+
+    if not topic_name:
+        raise ValueError(f"Topic {topic_id} missing topic name")
+    topic_name = str(topic_name)
+
+    if created_at is None:
+        date = datetime.now().strftime("%Y-%m-%d")
+    elif isinstance(created_at, str):
+        date = created_at[:10]
+    elif hasattr(created_at, "strftime"):
+        date = created_at.strftime("%Y-%m-%d")
+    else:
+        date = str(created_at)[:10]
+
     slug = slugify(topic_name)
     dir_path = os.path.join("output", f"{date}__{slug}")
     os.makedirs(dir_path, exist_ok=True)
