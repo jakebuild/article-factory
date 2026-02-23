@@ -9,7 +9,7 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 | Attribute | Value |
 |-----------|-------|
 | **Core Value** | A programmable research-backed publishing engine that separates stable research from fully programmable writing, enabling dynamic prompt injection at runtime. |
-| **Current Focus** | v2.0: Test Coverage — Phase 7: Pipeline + Research Tests (ready to plan) |
+| **Current Focus** | v2.0: Test Coverage — Phase 7: Pipeline + Research Tests (plan 2 pending) |
 | **Mode** | yolo |
 | **Depth** | quick |
 
@@ -18,9 +18,9 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 7 of 8 (Pipeline + Research Tests)
-Plan: 1 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-02-23 — phase 6 execution verified passed (7/7 must-haves)
+Plan: 2 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-23 — completed 07-01 scheduler tests (PIPE-01..PIPE-04)
 
 Progress: [███████████████░░░░░░] 75% (phases 1-6 complete, phases 7-8 pending)
 
@@ -29,9 +29,9 @@ Progress: [███████████████░░░░░░] 75% 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (phases 1-6)
+- Total plans completed: 17 (phases 1-6 + phase 7 plan 1)
 - Average duration: ~28 min estimated
-- Total execution time: ~6h 8m (phases 1-6)
+- Total execution time: ~6h 11m (through phase 7 plan 1)
 
 **By Phase:**
 
@@ -43,7 +43,7 @@ Progress: [███████████████░░░░░░] 75% 
 | 4. Async Pipeline | 5/5 | Complete |
 | 5. Test Infrastructure | 2/2 | Complete |
 | 6. DB + Errors Tests | 2/2 | Complete |
-| 7. Pipeline + Research Tests | 0/2 | Not started |
+| 7. Pipeline + Research Tests | 1/2 | In progress |
 | 8. Content + Wrapper Tests | 0/2 | Not started |
 
 **Recent executions:**
@@ -53,6 +53,8 @@ Progress: [███████████████░░░░░░] 75% 
 | Phase 05 P02 | 1 min | 3 tasks | 3 files |
 | Phase 06 P02 | 2 min | 3 tasks | 2 files |
 | Phase 06 P01 | 2 min | 3 tasks | 2 files |
+| Phase 07 P01 | 3 min | 3 tasks | 2 files |
+| Phase 07 P02 | 1 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -72,6 +74,10 @@ Recent decisions affecting current work:
 - [Phase 06]: Validate breaker recovery via explicit OPEN -> HALF_OPEN -> CLOSED transition checks
 - [Phase 06]: Keep DB helper tests fixture-driven via patched article_factory.database globals instead of ad hoc engines
 - [Phase 06]: Model DB-04 with asyncio.gather interleaving plus persisted read-back assertions for deterministic sqlite concurrency coverage
+- [Phase 07]: Track scheduler retries in _execute_pipeline and re-queue only while retry_count < 3
+- [Phase 07]: Capture scheduler stage progression via notify_progress emissions to keep tests aligned with production progress updates
+- [Phase 07]: Expose task_id from start_research into run_research so source import executes in the same orchestration path
+- [Phase 07]: Render synthesis source entries via dict-or-attribute access to support both fixture and SDK source shapes
 
 ### Pending Todos
 
@@ -86,5 +92,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed Phase 6 execution and verification; next is Phase 7 planning
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None
